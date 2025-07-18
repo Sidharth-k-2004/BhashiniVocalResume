@@ -1,0 +1,33 @@
+# node
+node_modules/
+.next/
+out/
+build/
+
+# Python virtual environment
+venv/
+
+# Python files
+*.pyc
+__pycache__/
+
+# Audio & large files
+*.dll
+*.lib
+*.mp3
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Environment
+.env*
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
