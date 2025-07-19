@@ -791,6 +791,202 @@ def update_resume(resume_id):
     
     return jsonify({'message': 'Resume updated successfully'}), 200
 
+
+
+@app.route('/api/process-audio-edit', methods=['POST'])
+@jwt_required()
+def process_audio_edit():
+    current_user_id = get_jwt_identity()
+    
+    if 'audio' not in request.files:
+        return jsonify({'message': 'No audio file provided'}), 400
+    
+    audio_file = request.files['audio']
+    resume_data_str = request.form.get('resumeData')
+    language = request.form.get('language', 'en')
+    
+    app.logger.debug("Starting audio edit processing")
+    
+    if not audio_file.filename:
+        return jsonify({'message': 'No audio file selected'}), 400
+    
+    if not resume_data_str:
+        return jsonify({'message': 'No resume data provided'}), 400
+    
+    try:
+        # Parse the current resume data
+        current_resume_data = json.loads(resume_data_str)
+    except json.JSONDecodeError:
+        return jsonify({'message': 'Invalid resume data format'}), 400
+    
+    # Save the uploaded file temporarily
+    file_ext = os.path.splitext(audio_file.filename)[1]
+    audio_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{uuid.uuid4()}{file_ext}")
+    audio_file.save(audio_path)
+    
+    converted_audio_path = None
+    transcript = None
+    
+    try:
+        # Try Bhashini first if configured
+        if BHASHINI_USER_ID and BHASHINI_API_KEY:
+            print("Attempting transcription with Bhashini...")
+            converted_audio_path = convert_audio_for_bhashini(audio_path)
+            if converted_audio_path:
+                transcript = transcribe_with_bhashini(converted_audio_path, language)
+        
+        # Fallback to Google Speech Recognition if Bhashini fails
+        if not transcript:
+            print("Bhashini failed or not configured. Falling back to Google Speech Recognition...")
+            transcript = transcribe_with_google_fallback(audio_path)
+        
+        if not transcript:
+            return jsonify({'message': 'Failed to transcribe audio with any service'}), 500
+        
+        print(f"Edit command transcript: {transcript}")
+        
+        # Process the edit command and apply changes to resume data
+        result = apply_audio_edits_to_resume(transcript, current_resume_data)
+        
+        if not result:
+            return jsonify({'message': 'Failed to process edit commands'}), 500
+        
+        return jsonify({
+            'message': 'Audio edit processed successfully',
+            'transcript': transcript,
+            'updatedData': result['updatedData'],
+            'changes': result['changes']
+        }), 200
+        
+    except Exception as e:
+        app.logger.error(f"Error: {e}")
+        return jsonify({'message': f'Error processing audio edit: {str(e)}'}), 500
+    
+    finally:
+        # Clean up temporary files
+        if os.path.exists(audio_path):
+            os.remove(audio_path)
+        if converted_audio_path and os.path.exists(converted_audio_path):
+            os.remove(converted_audio_path)
+
+def apply_audio_edits_to_resume(transcript, current_resume_data):
+    """Apply audio edit commands to resume data using OpenRouter API"""
+    
+    prompt = f"""You are a professional resume editor AI. You will receive a voice command transcript and current resume data in JSON format. Your task is to:
+
+1. Understand the editing instructions from the transcript
+2. Apply the requested changes to the resume data
+3. Return the updated resume data and a list of changes made
+
+Current Resume Data:
+{json.dumps(current_resume_data, indent=2)}
+
+Voice Command Transcript:
+"{transcript}"
+
+Please analyze the voice command and apply the requested changes to the resume data. Return your response in the following JSON format:
+
+{{
+  "updatedData": {{
+    // Updated resume data with changes applied
+    "personalInfo": {{
+      "name": "",
+      "title": "",
+      "email": "",
+      "phone": "",
+      "location": "",
+      "linkedin": ""
+    }},
+    "summary": "",
+    "experience": [
+      {{
+        "title": "",
+        "company": "",
+        "dates": "",
+        "location": "",
+        "description": ""
+      }}
+    ],
+    "education": [
+      {{
+        "degree": "",
+        "institution": "",
+        "dates": "",
+        "location": ""
+      }}
+    ],
+    "skills": []
+  }},
+  "changes": [
+    {{
+      "type": "add|remove|modify",
+      "section": "skills|personalInfo|experience|education|summary",
+      "field": "specific field name if applicable",
+      "oldValue": "previous value if modified/removed",
+      "newValue": "new value if added/modified",
+      "description": "Human readable description of the change"
+    }}
+  ]
+}}
+
+Examples of commands you should handle:
+- "Remove Python from my skills" -> Remove "Python" from skills array
+- "Add React and Node.js to my skills" -> Add these to skills array
+- "Change my location to New York" -> Update personalInfo.location
+- "Update my job title to Senior Developer" -> Update personalInfo.title
+- "Change my current company to Google" -> Update the most recent experience entry
+- "Add a new skill called Machine Learning" -> Add to skills array
+- "Remove my second job" -> Remove the second item from experience array
+- "Update my summary to say I'm passionate about AI" -> Modify the summary field
+
+IMPORTANT: 
+- Only return valid JSON, no markdown formatting or code blocks
+- Preserve all existing data that wasn't mentioned in the command
+- For skills, always return an array of strings
+- Be precise about which changes you made
+- If the command is unclear or cannot be executed, explain in the changes array
+"""
+
+    try:
+        response_text = call_openrouter_api(prompt, model="openai/gpt-4o-mini")
+        
+        if not response_text:
+            return None
+        
+        # Clean up the response
+        raw_json_str = response_text.strip()
+        
+        # Remove markdown formatting if present
+        if raw_json_str.startswith("```json"):
+            raw_json_str = re.sub(r"^```json\s*", "", raw_json_str)
+        if raw_json_str.endswith("```"):
+            raw_json_str = raw_json_str[:-3].strip()
+        
+        # Parse the JSON response
+        parsed_result = json.loads(raw_json_str)
+        
+        # Validate the response structure
+        if 'updatedData' not in parsed_result or 'changes' not in parsed_result:
+            print("Invalid response structure from OpenRouter")
+            return None
+        
+        # Ensure skills is always an array
+        if 'skills' in parsed_result['updatedData']:
+            skills = parsed_result['updatedData']['skills']
+            if isinstance(skills, str):
+                parsed_result['updatedData']['skills'] = [s.strip() for s in skills.split(',') if s.strip()]
+        
+        return parsed_result
+        
+    except json.JSONDecodeError as e:
+        print(f"Error parsing JSON from OpenRouter: {e}")
+        print(f"Raw response: {response_text}")
+        return None
+    except Exception as e:
+        print(f"Error in apply_audio_edits_to_resume: {e}")
+        return None
+
+
 @app.route('/api/resume/<resume_id>', methods=['DELETE'])
 @jwt_required()
 def delete_resume(resume_id):
