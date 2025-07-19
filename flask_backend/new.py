@@ -1,3 +1,4 @@
+
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -104,19 +105,53 @@ class User(db.Model):
 class Resume(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    template_id = db.Column(db.Integer, nullable=False)
+    template_id = db.Column(db.String(10), nullable=False)  # Changed to String to support p1, c1, etc.
     template_name = db.Column(db.String(50), nullable=False)
     resume_data = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
-# Template mapping
+# Updated Template mapping with string keys
 TEMPLATES = {
-    1: "Professional",
-    2: "Creative", 
-    3: "Minimal",
-    4: "Executive"
+    "p1": "Professional Corporate",
+    "p2": "Professional buisness", 
+    "p3": "Professional Executive Pro",
+    "p4": "Professional Modern Professional",
+    "p5": "Professional Classic",
+    "c1": "Creative Designer",
+    "c2": "Creative Artistic",
+    "c3": "Creative Degital Creative",
+    "c4": "Portfolio Plus",
+    "c5": "Innovative",
+    "m1": "Clean",
+    "m2": "Simplicity",
+    "m3": "Essentials",
+    "m4": "Minimalist Pro",
+    "m5": "Whitespace",
+    "e1": "Leadership",
+    "e2": "C-suite",
+    "e3": "Director",
+    "e4": "Board Member",
+    "e5": "Executive Elite"
 }
+
+# Helper function to validate template ID
+def is_valid_template_id(template_id):
+    """Validate if template_id is in the correct format and exists"""
+    return template_id in TEMPLATES
+
+def get_template_style_category(template_id):
+    """Get the style category from template ID"""
+    if template_id.startswith('p'):
+        return 'professional'
+    elif template_id.startswith('c'):
+        return 'creative'
+    elif template_id.startswith('m'):
+        return 'minimal'
+    elif template_id.startswith('e'):
+        return 'executive'
+    else:
+        return 'professional'  # default
 
 # Bhashini API Helper Functions
 def get_bhashini_auth_token():
@@ -439,16 +474,17 @@ def generate_pdf(resume_data, template_id):
     with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as temp_file:
         pdf_path = temp_file.name
     
-    # Get template style
-    template_name = TEMPLATES.get(int(template_id), "Professional")
+    # Get template style category and name
+    template_name = TEMPLATES.get(template_id, "Professional Classic")
+    style_category = get_template_style_category(template_id)
     
     # Create PDF document
     doc = SimpleDocTemplate(pdf_path, pagesize=letter)
     styles = getSampleStyleSheet()
     elements = []
     
-    # Add custom styles based on template
-    if template_name == "Professional":
+    # Add custom styles based on template category
+    if style_category == "professional":
         title_style = ParagraphStyle(
             'Title',
             parent=styles['Heading1'],
@@ -465,7 +501,7 @@ def generate_pdf(resume_data, template_id):
         )
         normal_style = styles['Normal']
     
-    elif template_name == "Creative":
+    elif style_category == "creative":
         title_style = ParagraphStyle(
             'Title',
             parent=styles['Heading1'],
@@ -482,7 +518,7 @@ def generate_pdf(resume_data, template_id):
         )
         normal_style = styles['Normal']
     
-    elif template_name == "Minimal":
+    elif style_category == "minimal":
         title_style = ParagraphStyle(
             'Title',
             parent=styles['Heading1'],
@@ -499,7 +535,7 @@ def generate_pdf(resume_data, template_id):
         )
         normal_style = styles['Normal']
     
-    else:  # Executive
+    else:  # executive
         title_style = ParagraphStyle(
             'Title',
             parent=styles['Heading1'],
@@ -674,7 +710,7 @@ def process_audio():
         return jsonify({'message': 'No audio file provided'}), 400
     
     audio_file = request.files['audio']
-    template_id_str = request.form.get('templateId', '1')
+    template_id = request.form.get('templateId', 'p1')  # Default to p1 instead of '1'
     language = request.form.get('language', 'en')
     
     app.logger.debug("Starting audio processing")
@@ -683,11 +719,9 @@ def process_audio():
         return jsonify({'message': 'No audio file selected'}), 400
     
     # Validate templateId
-    if not template_id_str.isdigit():
-        app.logger.error(f"Invalid templateId: {template_id_str}")
-        return jsonify({'message': f"Invalid templateId: {template_id_str}"}), 400
-    
-    template_id = int(template_id_str)
+    if not is_valid_template_id(template_id):
+        app.logger.error(f"Invalid templateId: {template_id}")
+        return jsonify({'message': f"Invalid templateId: {template_id}. Valid IDs: {list(TEMPLATES.keys())}"}), 400
     
     # Save the uploaded file temporarily
     file_ext = os.path.splitext(audio_file.filename)[1]
@@ -725,7 +759,7 @@ def process_audio():
         new_resume = Resume(
             user_id=current_user_id,
             template_id=template_id,
-            template_name=TEMPLATES.get(template_id, "Professional"),
+            template_name=TEMPLATES.get(template_id, "Professional Classic"),
             resume_data=json.dumps(response_json)
         )
         db.session.add(new_resume)
@@ -741,7 +775,7 @@ def process_audio():
     except Exception as e:
         app.logger.error(f"Error: {e}")
         return jsonify({'message': f'Error processing audio: {str(e)}'}), 500
-    
+        
     finally:
         # Clean up temporary files
         if os.path.exists(audio_path):
@@ -787,8 +821,6 @@ def update_resume(resume_id):
     db.session.commit()
     
     return jsonify({'message': 'Resume updated successfully'}), 200
-
-
 
 @app.route('/api/process-audio-edit', methods=['POST'])
 @jwt_required()
@@ -858,7 +890,7 @@ def process_audio_edit():
     except Exception as e:
         app.logger.error(f"Error: {e}")
         return jsonify({'message': f'Error processing audio edit: {str(e)}'}), 500
-    
+        
     finally:
         # Clean up temporary files
         if os.path.exists(audio_path):
@@ -941,8 +973,7 @@ IMPORTANT:
 - Preserve all existing data that wasn't mentioned in the command
 - For skills, always return an array of strings
 - Be precise about which changes you made
-- If the command is unclear or cannot be executed, explain in the changes array
-"""
+- If the command is unclear or cannot be executed, explain in the changes array"""
 
     try:
         response_text = call_openrouter_api(prompt, model="openai/gpt-4o-mini")
@@ -982,7 +1013,6 @@ IMPORTANT:
     except Exception as e:
         print(f"Error in apply_audio_edits_to_resume: {e}")
         return None
-
 
 @app.route('/api/resume/<resume_id>', methods=['DELETE'])
 @jwt_required()
@@ -1045,11 +1075,30 @@ def get_user_resumes():
     
     return jsonify({'resumes': resume_list}), 200
 
-@app.route('/api/preview-template/<int:template_id>', methods=['GET'])
+@app.route('/api/preview-template/<template_id>', methods=['GET'])
 def preview_template(template_id):
+    if not is_valid_template_id(template_id):
+        return jsonify({'message': f'Invalid template ID: {template_id}'}), 400
+    
     return jsonify({
-        'message': f'Preview for template {template_id} - {TEMPLATES.get(template_id, "Unknown")}'
+        'message': f'Preview for template {template_id} - {TEMPLATES.get(template_id)}',
+        'templateId': template_id,
+        'templateName': TEMPLATES.get(template_id),
+        'category': get_template_style_category(template_id)
     }), 200
+
+@app.route('/api/templates', methods=['GET'])
+def get_templates():
+    """Get all available templates"""
+    template_list = []
+    for template_id, template_name in TEMPLATES.items():
+        template_list.append({
+            'id': template_id,
+            'name': template_name,
+            'category': get_template_style_category(template_id)
+        })
+    
+    return jsonify({'templates': template_list}), 200
 
 # Test endpoints
 @app.route('/api/test-bhashini', methods=['GET'])
@@ -1073,7 +1122,9 @@ def system_status():
         'bhashini_configured': bool(BHASHINI_USER_ID and BHASHINI_API_KEY),
         'database_type': 'SQLite' if 'sqlite' in app.config['SQLALCHEMY_DATABASE_URI'] else 'MySQL',
         'bhashini_user_id': BHASHINI_USER_ID,
-        'bhashini_api_key_set': bool(BHASHINI_API_KEY)
+        'bhashini_api_key_set': bool(BHASHINI_API_KEY),
+        'available_templates': list(TEMPLATES.keys()),
+        'template_count': len(TEMPLATES)
     }), 200
 
 # Create database tables
@@ -1093,6 +1144,7 @@ if __name__ == '__main__':
         print(f"Bhashini User ID: {BHASHINI_USER_ID}")
     if BHASHINI_API_KEY:
         print(f"Bhashini API Key: {BHASHINI_API_KEY[:10]}...")
+    print(f"Available Templates: {list(TEMPLATES.keys())}")
     print("====================")
     
     serve(app, host='0.0.0.0', port=5000)
