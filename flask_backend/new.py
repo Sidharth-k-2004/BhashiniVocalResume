@@ -62,7 +62,7 @@ jwt = JWTManager(app)
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Configure OpenRouter API
-OPENROUTER_API_KEY = "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"
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
 # Bhashini API Configuration - now properly reading from .env
