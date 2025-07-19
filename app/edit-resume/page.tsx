@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -30,10 +29,9 @@ export default function EditResumePage() {
             const response = await fetch(`http://localhost:5000/api/resume/${resumeId}`, {
               credentials: "include",
             })
-
             if (response.ok) {
               const data = await response.json()
-              setResumeData(data)
+              setResumeData(ensureResumeStructure(data))
             } else {
               throw new Error("Failed to load resume data from API")
             }
@@ -71,18 +69,37 @@ export default function EditResumePage() {
     try {
       const parsedData = JSON.parse(storedData)
       const resumeJson = parsedData.data ? parsedData.data : parsedData
-
       if (typeof resumeJson === "string" && resumeJson.startsWith("json")) {
         const jsonStart = resumeJson.indexOf("{")
         const jsonEnd = resumeJson.lastIndexOf("}") + 1
         const jsonString = resumeJson.substring(jsonStart, jsonEnd)
-        setResumeData(JSON.parse(jsonString))
+        setResumeData(ensureResumeStructure(JSON.parse(jsonString)))
       } else {
-        setResumeData(resumeJson)
+        setResumeData(ensureResumeStructure(resumeJson))
       }
     } catch (error) {
       console.error("Error parsing stored data:", error)
       setResumeData(getEmptyResumeData())
+    }
+  }
+
+  const ensureResumeStructure = (data: any) => {
+    // Ensure all required arrays exist
+    return {
+      ...data,
+      experience: Array.isArray(data.experience) ? data.experience : [],
+      education: Array.isArray(data.education) ? data.education : [],
+      projects: Array.isArray(data.projects) ? data.projects : [],
+      skills: Array.isArray(data.skills) ? data.skills : [""],
+      personalInfo: data.personalInfo || {
+        name: "",
+        title: "",
+        email: "",
+        phone: "",
+        location: "",
+        linkedin: "",
+      },
+      summary: data.summary || "",
     }
   }
 
@@ -114,6 +131,7 @@ export default function EditResumePage() {
           location: "",
         },
       ],
+      projects: [], // Added projects array
       skills: [""],
     }
   }
@@ -129,12 +147,11 @@ export default function EditResumePage() {
   }
 
   const handleArrayItemChange = (section: string, index: number, field: string, value: string) => {
-    const newArray = [...resumeData[section]]
+    const newArray = [...(resumeData[section] || [])]
     newArray[index] = {
       ...newArray[index],
       [field]: value,
     }
-
     setResumeData({
       ...resumeData,
       [section]: newArray,
@@ -142,16 +159,17 @@ export default function EditResumePage() {
   }
 
   const addArrayItem = (section: string, template: any) => {
+    // Ensure the section exists and is an array
+    const currentArray = Array.isArray(resumeData[section]) ? resumeData[section] : []
     setResumeData({
       ...resumeData,
-      [section]: [...resumeData[section], template],
+      [section]: [...currentArray, template],
     })
   }
 
   const removeArrayItem = (section: string, index: number) => {
-    const newArray = [...resumeData[section]]
+    const newArray = [...(resumeData[section] || [])]
     newArray.splice(index, 1)
-
     setResumeData({
       ...resumeData,
       [section]: newArray,
@@ -159,9 +177,8 @@ export default function EditResumePage() {
   }
 
   const handleSkillChange = (index: number, value: string) => {
-    const newSkills = [...resumeData.skills]
+    const newSkills = [...(resumeData.skills || [])]
     newSkills[index] = value
-
     setResumeData({
       ...resumeData,
       skills: newSkills,
@@ -169,16 +186,16 @@ export default function EditResumePage() {
   }
 
   const addSkill = () => {
+    const currentSkills = Array.isArray(resumeData.skills) ? resumeData.skills : []
     setResumeData({
       ...resumeData,
-      skills: [...resumeData.skills, ""],
+      skills: [...currentSkills, ""],
     })
   }
 
   const removeSkill = (index: number) => {
-    const newSkills = [...resumeData.skills]
+    const newSkills = [...(resumeData.skills || [])]
     newSkills.splice(index, 1)
-
     setResumeData({
       ...resumeData,
       skills: newSkills,
@@ -187,7 +204,6 @@ export default function EditResumePage() {
 
   const handleSaveResume = async () => {
     setIsSaving(true)
-
     try {
       if (resumeId) {
         // If we have a resumeId, update via API
@@ -200,7 +216,6 @@ export default function EditResumePage() {
             body: JSON.stringify(resumeData),
             credentials: "include",
           })
-
           if (response.ok) {
             toast({
               title: "Resume updated",
@@ -226,7 +241,6 @@ export default function EditResumePage() {
           description: "Your resume has been saved to your browser.",
         })
       }
-
       // Navigate to preview
       if (resumeId) {
         router.push(`/resume-preview?id=${resumeId}`)
@@ -293,42 +307,42 @@ export default function EditResumePage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Full Name</label>
                 <Input
-                  value={resumeData.personalInfo.name || ""}
+                  value={resumeData.personalInfo?.name || ""}
                   onChange={(e) => handleInputChange("personalInfo", "name", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Professional Title</label>
                 <Input
-                  value={resumeData.personalInfo.title || ""}
+                  value={resumeData.personalInfo?.title || ""}
                   onChange={(e) => handleInputChange("personalInfo", "title", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Email</label>
                 <Input
-                  value={resumeData.personalInfo.email || ""}
+                  value={resumeData.personalInfo?.email || ""}
                   onChange={(e) => handleInputChange("personalInfo", "email", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Phone</label>
                 <Input
-                  value={resumeData.personalInfo.phone || ""}
+                  value={resumeData.personalInfo?.phone || ""}
                   onChange={(e) => handleInputChange("personalInfo", "phone", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Location</label>
                 <Input
-                  value={resumeData.personalInfo.location || ""}
+                  value={resumeData.personalInfo?.location || ""}
                   onChange={(e) => handleInputChange("personalInfo", "location", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">LinkedIn</label>
                 <Input
-                  value={resumeData.personalInfo.linkedin || ""}
+                  value={resumeData.personalInfo?.linkedin || ""}
                   onChange={(e) => handleInputChange("personalInfo", "linkedin", e.target.value)}
                 />
               </div>
@@ -355,7 +369,6 @@ export default function EditResumePage() {
         <Card>
           <CardContent className="pt-6">
             <h2 className="text-xl font-semibold mb-4">Work Experience</h2>
-
             {resumeData.experience &&
               resumeData.experience.map((exp: any, index: number) => (
                 <div key={index} className="mb-6 pb-6 border-b last:border-0">
@@ -370,7 +383,6 @@ export default function EditResumePage() {
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Job Title</label>
@@ -412,10 +424,9 @@ export default function EditResumePage() {
                   </div>
                 </div>
               ))}
-
             <Button
               variant="outline"
-              className="w-full mt-4"
+              className="w-full mt-4 bg-transparent"
               onClick={() =>
                 addArrayItem("experience", {
                   title: "",
@@ -436,7 +447,6 @@ export default function EditResumePage() {
         <Card>
           <CardContent className="pt-6">
             <h2 className="text-xl font-semibold mb-4">Education</h2>
-
             {resumeData.education &&
               resumeData.education.map((edu: any, index: number) => (
                 <div key={index} className="mb-6 pb-6 border-b last:border-0">
@@ -451,7 +461,6 @@ export default function EditResumePage() {
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Degree</label>
@@ -485,10 +494,9 @@ export default function EditResumePage() {
                   </div>
                 </div>
               ))}
-
             <Button
               variant="outline"
-              className="w-full mt-4"
+              className="w-full mt-4 bg-transparent"
               onClick={() =>
                 addArrayItem("education", {
                   degree: "",
@@ -504,11 +512,100 @@ export default function EditResumePage() {
           </CardContent>
         </Card>
 
+        {/* Projects */}
+        <Card>
+          <CardContent className="pt-6">
+            <h2 className="text-xl font-semibold mb-4">Projects</h2>
+            {resumeData.projects &&
+              resumeData.projects.map((project: any, index: number) => (
+                <div key={index} className="mb-6 pb-6 border-b last:border-0">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-medium">Project {index + 1}</h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => removeArrayItem("projects", index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Project Name</label>
+                      <Input
+                        value={project.name || ""}
+                        onChange={(e) => handleArrayItemChange("projects", index, "name", e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Your Role</label>
+                      <Input
+                        value={project.role || ""}
+                        onChange={(e) => handleArrayItemChange("projects", index, "role", e.target.value)}
+                        placeholder="e.g., Lead Developer, Team Member"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Technologies Used</label>
+                      <Input
+                        value={project.technologies || ""}
+                        onChange={(e) => handleArrayItemChange("projects", index, "technologies", e.target.value)}
+                        placeholder="e.g., React, Node.js, MongoDB"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Dates</label>
+                      <Input
+                        value={project.dates || ""}
+                        onChange={(e) => handleArrayItemChange("projects", index, "dates", e.target.value)}
+                        placeholder="e.g., Jan 2023 - Mar 2023"
+                      />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                      <label className="text-sm font-medium">Project Link (Optional)</label>
+                      <Input
+                        value={project.link || ""}
+                        onChange={(e) => handleArrayItemChange("projects", index, "link", e.target.value)}
+                        placeholder="e.g., https://github.com/username/project or https://project-demo.com"
+                      />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                      <label className="text-sm font-medium">Description</label>
+                      <Textarea
+                        rows={3}
+                        value={project.description || ""}
+                        onChange={(e) => handleArrayItemChange("projects", index, "description", e.target.value)}
+                        placeholder="Describe what the project does, your contributions, and key achievements..."
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            <Button
+              variant="outline"
+              className="w-full mt-4 bg-transparent"
+              onClick={() =>
+                addArrayItem("projects", {
+                  name: "",
+                  description: "",
+                  technologies: "",
+                  dates: "",
+                  link: "",
+                  role: "",
+                })
+              }
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Project
+            </Button>
+          </CardContent>
+        </Card>
+
         {/* Skills */}
         <Card>
           <CardContent className="pt-6">
             <h2 className="text-xl font-semibold mb-4">Skills</h2>
-
             <div className="space-y-4">
               {resumeData.skills &&
                 resumeData.skills.map((skill: string, index: number) => (
@@ -528,8 +625,7 @@ export default function EditResumePage() {
                     </Button>
                   </div>
                 ))}
-
-              <Button variant="outline" className="w-full" onClick={addSkill}>
+              <Button variant="outline" className="w-full bg-transparent" onClick={addSkill}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Skill
               </Button>

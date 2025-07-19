@@ -23,6 +23,13 @@ interface ResumeData {
     dates: string
     location: string
   }>
+  projects?: Array<{
+    name: string
+    description: string
+    technologies?: string
+    link?: string
+    dates?: string
+  }>
   skills: string[]
 }
 
@@ -102,6 +109,22 @@ function ProfessionalCorporateTemplate({ data }: { data: ResumeData }) {
               </div>
             ))}
           </div>
+          {data.projects && data.projects.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3">Projects</h3>
+              {data.projects.map((project: any, index: number) => (
+                <div key={index} className="mb-4">
+                  <div className="flex justify-between">
+                    <p className="font-medium">{project.name}</p>
+                    {project.dates && <p className="text-sm text-gray-600">{project.dates}</p>}
+                  </div>
+                  {project.technologies && <p className="text-sm font-medium text-blue-600">{project.technologies}</p>}
+                  {project.link && <p className="text-sm text-gray-500">{project.link}</p>}
+                  <p className="text-sm mt-2">{project.description}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -123,14 +146,12 @@ function ProfessionalBusinessTemplate({ data }: { data: ResumeData }) {
           {data.personalInfo.location && <p className="text-sm">{data.personalInfo.location}</p>}
         </div>
       </div>
-
       {data.summary && (
         <div className="mb-6">
           <h3 className="text-lg font-semibold border-b border-gray-200 pb-2 mb-3">Summary</h3>
           <p className="text-sm text-center">{data.summary}</p>
         </div>
       )}
-
       <div className="mb-6">
         <h3 className="text-lg font-semibold border-b border-gray-200 pb-2 mb-3">Experience</h3>
         {data.experience.map((exp: any, index: number) => (
@@ -145,7 +166,22 @@ function ProfessionalBusinessTemplate({ data }: { data: ResumeData }) {
           </div>
         ))}
       </div>
-
+      {data.projects && data.projects.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold border-b border-gray-200 pb-2 mb-3">Projects</h3>
+          {data.projects.map((project: any, index: number) => (
+            <div key={index} className="mb-5 text-center">
+              <div className="flex justify-between items-center">
+                <p className="font-bold text-lg">{project.name}</p>
+                {project.dates && <p className="text-sm text-gray-600">{project.dates}</p>}
+              </div>
+              {project.technologies && <p className="text-md font-medium">{project.technologies}</p>}
+              {project.link && <p className="text-sm text-gray-500">{project.link}</p>}
+              <p className="text-sm mt-2">{project.description}</p>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <h3 className="text-lg font-semibold border-b border-gray-200 pb-2 mb-3">Education</h3>
@@ -186,7 +222,6 @@ function ProfessionalExecutiveProTemplate({ data }: { data: ResumeData }) {
           {data.personalInfo.location && <p>{data.personalInfo.location}</p>}
         </div>
       </div>
-
       <div className="p-8">
         {data.summary && (
           <div className="mb-8">
@@ -194,7 +229,6 @@ function ProfessionalExecutiveProTemplate({ data }: { data: ResumeData }) {
             <p className="text-sm leading-relaxed">{data.summary}</p>
           </div>
         )}
-
         <div className="mb-8">
           <h3 className="text-xl font-bold mb-6 text-gray-800">Experience</h3>
           <div className="relative">
@@ -217,7 +251,32 @@ function ProfessionalExecutiveProTemplate({ data }: { data: ResumeData }) {
             ))}
           </div>
         </div>
-
+        {data.projects && data.projects.length > 0 && (
+          <div className="mb-8">
+            <h3 className="text-xl font-bold mb-6 text-gray-800">Projects</h3>
+            <div className="relative">
+              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-green-500"></div>
+              {data.projects.map((project: any, index: number) => (
+                <div key={index} className="relative pl-12 pb-8">
+                  <div className="absolute left-2 w-4 h-4 bg-green-500 rounded-full border-4 border-white shadow"></div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="flex justify-between items-start mb-2">
+                      <p className="font-bold text-lg">{project.name}</p>
+                      {project.dates && (
+                        <span className="text-sm text-gray-600 bg-green-100 px-2 py-1 rounded">{project.dates}</span>
+                      )}
+                    </div>
+                    {project.technologies && (
+                      <p className="text-md font-medium text-green-600 mb-1">{project.technologies}</p>
+                    )}
+                    {project.link && <p className="text-sm text-gray-500 mb-2">{project.link}</p>}
+                    <p className="text-sm">{project.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <h3 className="text-xl font-bold mb-4 text-gray-800">Education</h3>
@@ -259,7 +318,6 @@ function ProfessionalModernTemplate({ data }: { data: ResumeData }) {
           {data.personalInfo.location && <p className="flex items-center gap-1">{data.personalInfo.location}</p>}
         </div>
       </div>
-
       {data.summary && (
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
@@ -269,7 +327,6 @@ function ProfessionalModernTemplate({ data }: { data: ResumeData }) {
           <p className="text-sm leading-relaxed">{data.summary}</p>
         </div>
       )}
-
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
         <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
           <div className="w-1 h-6 bg-green-500 rounded"></div>
@@ -287,17 +344,39 @@ function ProfessionalModernTemplate({ data }: { data: ResumeData }) {
           </div>
         ))}
       </div>
-
+      {data.projects && data.projects.length > 0 && (
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+          <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <div className="w-1 h-6 bg-purple-500 rounded"></div>
+            Projects
+          </h3>
+          {data.projects.map((project: any, index: number) => (
+            <div key={index} className="border-l-2 border-purple-100 pl-4 mb-6 last:mb-0">
+              <div className="flex justify-between items-start mb-2">
+                <p className="font-bold text-lg">{project.name}</p>
+                {project.dates && (
+                  <span className="text-sm text-white bg-purple-500 px-3 py-1 rounded-full">{project.dates}</span>
+                )}
+              </div>
+              {project.technologies && (
+                <p className="text-md font-medium text-purple-600 mb-1">{project.technologies}</p>
+              )}
+              {project.link && <p className="text-sm text-gray-500 mb-2">{project.link}</p>}
+              <p className="text-sm">{project.description}</p>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <div className="w-1 h-6 bg-purple-500 rounded"></div>
+            <div className="w-1 h-6 bg-orange-500 rounded"></div>
             Education
           </h3>
           {data.education.map((edu: any, index: number) => (
-            <div key={index} className="border border-purple-100 rounded-lg p-3 mb-3 last:mb-0">
+            <div key={index} className="border border-orange-100 rounded-lg p-3 mb-3 last:mb-0">
               <p className="font-bold">{edu.degree}</p>
-              {edu.institution && <p className="text-sm font-medium text-purple-600">{edu.institution}</p>}
+              {edu.institution && <p className="text-sm font-medium text-orange-600">{edu.institution}</p>}
               {edu.dates && <p className="text-sm text-gray-600">{edu.dates}</p>}
               {edu.location && <p className="text-sm">{edu.location}</p>}
             </div>
@@ -305,13 +384,13 @@ function ProfessionalModernTemplate({ data }: { data: ResumeData }) {
         </div>
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <div className="w-1 h-6 bg-orange-500 rounded"></div>
+            <div className="w-1 h-6 bg-red-500 rounded"></div>
             Skills
           </h3>
           <div className="grid grid-cols-1 gap-2">
             {data.skills.map((skill: string, index: number) => (
-              <div key={index} className="bg-orange-50 border border-orange-200 rounded-lg p-3 text-center">
-                <span className="font-medium text-orange-700">{skill}</span>
+              <div key={index} className="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
+                <span className="font-medium text-red-700">{skill}</span>
               </div>
             ))}
           </div>
@@ -334,14 +413,12 @@ function ProfessionalClassicTemplate({ data }: { data: ResumeData }) {
           {data.personalInfo.location && <p>{data.personalInfo.location}</p>}
         </div>
       </div>
-
       {data.summary && (
         <div className="mb-8">
           <h3 className="text-xl font-serif font-bold text-gray-800 mb-4 text-center">Professional Summary</h3>
           <p className="text-sm leading-relaxed text-justify">{data.summary}</p>
         </div>
       )}
-
       <div className="mb-8">
         <h3 className="text-xl font-serif font-bold text-gray-800 mb-6 text-center">Professional Experience</h3>
         {data.experience.map((exp: any, index: number) => (
@@ -358,7 +435,24 @@ function ProfessionalClassicTemplate({ data }: { data: ResumeData }) {
           </div>
         ))}
       </div>
-
+      {data.projects && data.projects.length > 0 && (
+        <div className="mb-8">
+          <h3 className="text-xl font-serif font-bold text-gray-800 mb-6 text-center">Notable Projects</h3>
+          {data.projects.map((project: any, index: number) => (
+            <div key={index} className="mb-6 pb-4 border-b border-gray-200 last:border-b-0">
+              <div className="text-center mb-3">
+                <p className="font-bold text-lg">{project.name}</p>
+                {project.technologies && <p className="text-md font-serif italic">{project.technologies}</p>}
+                <div className="flex justify-center gap-4 text-sm text-gray-600 mt-1">
+                  {project.dates && <p>{project.dates}</p>}
+                  {project.link && <p>{project.link}</p>}
+                </div>
+              </div>
+              <p className="text-sm text-justify">{project.description}</p>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <h3 className="text-xl font-serif font-bold text-gray-800 mb-4 text-center">Education</h3>
@@ -420,7 +514,6 @@ function CreativeDesignerTemplate({ data }: { data: ResumeData }) {
           <h2 className="text-2xl font-bold">{data.personalInfo.name}</h2>
           <p className="text-lg opacity-90 mt-1">{data.personalInfo.title}</p>
         </div>
-
         <div className="mb-8">
           <h3 className="text-lg font-bold mb-4 border-b border-white/30 pb-2">Contact</h3>
           <div className="space-y-3">
@@ -434,7 +527,6 @@ function CreativeDesignerTemplate({ data }: { data: ResumeData }) {
             )}
           </div>
         </div>
-
         <div className="mb-8">
           <h3 className="text-lg font-bold mb-4 border-b border-white/30 pb-2">Skills</h3>
           <div className="space-y-3">
@@ -445,7 +537,6 @@ function CreativeDesignerTemplate({ data }: { data: ResumeData }) {
             ))}
           </div>
         </div>
-
         <div>
           <h3 className="text-lg font-bold mb-4 border-b border-white/30 pb-2">Education</h3>
           {data.education.map((edu: any, index: number) => (
@@ -458,7 +549,6 @@ function CreativeDesignerTemplate({ data }: { data: ResumeData }) {
           ))}
         </div>
       </div>
-
       <div className="p-8 md:col-span-2">
         {data.summary && (
           <div className="mb-8">
@@ -466,7 +556,6 @@ function CreativeDesignerTemplate({ data }: { data: ResumeData }) {
             <p className="text-sm leading-relaxed">{data.summary}</p>
           </div>
         )}
-
         <div className="mb-8">
           <h3 className="text-2xl font-bold text-purple-800 mb-6 border-b-2 border-purple-200 pb-2">Experience</h3>
           {data.experience.map((exp: any, index: number) => (
@@ -488,6 +577,33 @@ function CreativeDesignerTemplate({ data }: { data: ResumeData }) {
             </div>
           ))}
         </div>
+        {data.projects && data.projects.length > 0 && (
+          <div className="mb-8">
+            <h3 className="text-2xl font-bold text-purple-800 mb-6 border-b-2 border-purple-200 pb-2">
+              Creative Projects
+            </h3>
+            {data.projects.map((project: any, index: number) => (
+              <div key={index} className="mb-8 relative">
+                <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-pink-400 to-orange-400 rounded"></div>
+                <div className="pl-6">
+                  <div className="flex justify-between items-start mb-2">
+                    <p className="font-bold text-lg text-gray-800">{project.name}</p>
+                    {project.dates && (
+                      <span className="text-sm text-white bg-gradient-to-r from-pink-400 to-orange-400 px-3 py-1 rounded-full">
+                        {project.dates}
+                      </span>
+                    )}
+                  </div>
+                  {project.technologies && (
+                    <p className="text-md font-medium text-pink-600 mb-1">{project.technologies}</p>
+                  )}
+                  {project.link && <p className="text-sm text-gray-500 mb-3">{project.link}</p>}
+                  <p className="text-sm leading-relaxed">{project.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -500,7 +616,6 @@ function CreativeArtisticTemplate({ data }: { data: ResumeData }) {
       {/* Decorative elements */}
       <div className="absolute top-0 right-0 w-1/3 h-1/2 bg-gradient-to-bl from-orange-300 to-red-300 opacity-20"></div>
       <div className="absolute bottom-0 left-0 w-1/4 h-1/3 bg-gradient-to-tr from-blue-300 to-purple-300 opacity-20"></div>
-
       <div className="relative z-10 p-8">
         <div className="mb-8">
           <h2 className="text-5xl font-bold text-gray-800 mb-2 transform -skew-x-6">{data.personalInfo.name}</h2>
@@ -515,7 +630,6 @@ function CreativeArtisticTemplate({ data }: { data: ResumeData }) {
             )}
           </div>
         </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             {data.summary && (
@@ -529,7 +643,6 @@ function CreativeArtisticTemplate({ data }: { data: ResumeData }) {
                 </p>
               </div>
             )}
-
             <div className="mb-8">
               <h3 className="text-2xl font-bold text-blue-600 mb-6 relative">
                 Experience Journey
@@ -553,8 +666,34 @@ function CreativeArtisticTemplate({ data }: { data: ResumeData }) {
                 </div>
               ))}
             </div>
+            {data.projects && data.projects.length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-2xl font-bold text-green-600 mb-6 relative">
+                  Creative Projects
+                  <div className="absolute -bottom-1 left-0 w-18 h-1 bg-gradient-to-r from-green-400 to-teal-400"></div>
+                </h3>
+                {data.projects.map((project: any, index: number) => (
+                  <div key={index} className="mb-6 relative">
+                    <div className="bg-white border-2 border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start mb-3">
+                        <p className="font-bold text-lg text-gray-800">{project.name}</p>
+                        {project.dates && (
+                          <span className="text-sm text-white bg-gradient-to-r from-green-500 to-teal-500 px-3 py-1 rounded-full transform -rotate-1">
+                            {project.dates}
+                          </span>
+                        )}
+                      </div>
+                      {project.technologies && (
+                        <p className="text-md font-medium text-green-600 mb-1">{project.technologies}</p>
+                      )}
+                      {project.link && <p className="text-sm text-gray-500 mb-3">{project.link}</p>}
+                      <p className="text-sm leading-relaxed">{project.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-
           <div className="lg:col-span-1">
             <div className="mb-8">
               <h3 className="text-xl font-bold text-purple-600 mb-4 relative">
@@ -578,7 +717,6 @@ function CreativeArtisticTemplate({ data }: { data: ResumeData }) {
                 ))}
               </div>
             </div>
-
             <div>
               <h3 className="text-xl font-bold text-green-600 mb-4 relative">
                 Education
@@ -613,7 +751,6 @@ function CreativeDigitalTemplate({ data }: { data: ResumeData }) {
             <p className="text-xl text-gray-600 mb-4">{data.personalInfo.title}</p>
             {data.summary && <p className="text-sm leading-relaxed text-gray-700">{data.summary}</p>}
           </div>
-
           <div className="bg-white rounded-2xl p-6 shadow-lg">
             <h3 className="text-lg font-bold text-gray-800 mb-4">Contact</h3>
             <div className="space-y-3">
@@ -629,7 +766,6 @@ function CreativeDigitalTemplate({ data }: { data: ResumeData }) {
             </div>
           </div>
         </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div className="lg:col-span-2 bg-white rounded-2xl p-8 shadow-lg">
             <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
@@ -654,7 +790,6 @@ function CreativeDigitalTemplate({ data }: { data: ResumeData }) {
               </div>
             ))}
           </div>
-
           <div className="space-y-6">
             <div className="bg-white rounded-2xl p-6 shadow-lg">
               <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -672,7 +807,6 @@ function CreativeDigitalTemplate({ data }: { data: ResumeData }) {
                 ))}
               </div>
             </div>
-
             <div className="bg-white rounded-2xl p-6 shadow-lg">
               <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <div className="w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-lg"></div>
@@ -692,6 +826,36 @@ function CreativeDigitalTemplate({ data }: { data: ResumeData }) {
             </div>
           </div>
         </div>
+        {data.projects && data.projects.length > 0 && (
+          <div className="bg-white rounded-2xl p-8 shadow-lg mb-8">
+            <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+              <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-teal-500 rounded-lg"></div>
+              Projects
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {data.projects.map((project: any, index: number) => (
+                <div
+                  key={index}
+                  className="bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-6 border border-gray-100"
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <p className="font-bold text-lg text-gray-800">{project.name}</p>
+                    {project.dates && (
+                      <span className="text-sm text-white bg-gradient-to-r from-green-500 to-teal-500 px-3 py-1 rounded-full">
+                        {project.dates}
+                      </span>
+                    )}
+                  </div>
+                  {project.technologies && (
+                    <p className="text-md font-medium text-teal-600 mb-2">{project.technologies}</p>
+                  )}
+                  {project.link && <p className="text-sm text-gray-500 mb-3">{project.link}</p>}
+                  <p className="text-sm leading-relaxed">{project.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -713,7 +877,6 @@ function CreativePortfolioTemplate({ data }: { data: ResumeData }) {
             <h2 className="text-2xl font-bold mb-2">{data.personalInfo.name}</h2>
             <p className="text-lg opacity-90">{data.personalInfo.title}</p>
           </div>
-
           <div className="bg-gray-50 rounded-2xl p-6 mb-6">
             <h3 className="text-lg font-bold text-gray-800 mb-4">Contact Info</h3>
             <div className="space-y-3">
@@ -722,7 +885,6 @@ function CreativePortfolioTemplate({ data }: { data: ResumeData }) {
               {data.personalInfo.location && <p className="text-sm">{data.personalInfo.location}</p>}
             </div>
           </div>
-
           <div className="bg-gray-50 rounded-2xl p-6 mb-6">
             <h3 className="text-lg font-bold text-gray-800 mb-4">Skills</h3>
             <div className="flex flex-wrap gap-2">
@@ -733,7 +895,6 @@ function CreativePortfolioTemplate({ data }: { data: ResumeData }) {
               ))}
             </div>
           </div>
-
           <div className="bg-gray-50 rounded-2xl p-6">
             <h3 className="text-lg font-bold text-gray-800 mb-4">Education</h3>
             {data.education.map((edu: any, index: number) => (
@@ -746,7 +907,6 @@ function CreativePortfolioTemplate({ data }: { data: ResumeData }) {
             ))}
           </div>
         </div>
-
         <div className="lg:col-span-3">
           {data.summary && (
             <div className="mb-8">
@@ -756,7 +916,6 @@ function CreativePortfolioTemplate({ data }: { data: ResumeData }) {
               </p>
             </div>
           )}
-
           <div className="mb-8">
             <h3 className="text-2xl font-bold text-gray-800 mb-6">Experience</h3>
             {data.experience.map((exp: any, index: number) => (
@@ -777,21 +936,42 @@ function CreativePortfolioTemplate({ data }: { data: ResumeData }) {
               </div>
             ))}
           </div>
-
+          {data.projects && data.projects.length > 0 && (
+            <div className="mb-8">
+              <h3 className="text-2xl font-bold text-gray-800 mb-6">Portfolio Projects</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {data.projects.map((project: any, index: number) => (
+                  <div key={index} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                    <div className="flex justify-between items-start mb-4">
+                      <p className="font-bold text-lg text-gray-800">{project.name}</p>
+                      {project.dates && (
+                        <span className="text-sm text-white bg-blue-500 px-3 py-2 rounded-full">{project.dates}</span>
+                      )}
+                    </div>
+                    {project.technologies && (
+                      <p className="text-sm font-medium text-blue-600 mb-2">{project.technologies}</p>
+                    )}
+                    {project.link && <p className="text-sm text-gray-500 mb-3">{project.link}</p>}
+                    <p className="text-sm leading-relaxed">{project.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <div>
             <h3 className="text-2xl font-bold text-gray-800 mb-6">Portfolio Highlights</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-gradient-to-br from-green-100 to-blue-100 rounded-xl p-6 text-center">
                 <div className="w-16 h-16 bg-green-200 rounded-xl mx-auto mb-3"></div>
-                <p className="font-medium">Project 1</p>
+                <p className="font-medium">Design Work</p>
               </div>
               <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl p-6 text-center">
                 <div className="w-16 h-16 bg-blue-200 rounded-xl mx-auto mb-3"></div>
-                <p className="font-medium">Project 2</p>
+                <p className="font-medium">Development</p>
               </div>
               <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl p-6 text-center">
                 <div className="w-16 h-16 bg-purple-200 rounded-xl mx-auto mb-3"></div>
-                <p className="font-medium">Project 3</p>
+                <p className="font-medium">Creative</p>
               </div>
             </div>
           </div>
@@ -810,7 +990,6 @@ function CreativeInnovationTemplate({ data }: { data: ResumeData }) {
       <div className="absolute top-1/4 right-0 w-24 h-24 bg-blue-500 rounded-full translate-x-12"></div>
       <div className="absolute bottom-0 left-1/4 w-40 h-40 bg-purple-400 transform rotate-12 translate-y-20"></div>
       <div className="absolute bottom-1/4 right-1/4 w-16 h-16 bg-green-400 transform rotate-45"></div>
-
       <div className="relative z-10 p-8">
         <div className="max-w-6xl mx-auto">
           <div className="mb-12">
@@ -834,7 +1013,6 @@ function CreativeInnovationTemplate({ data }: { data: ResumeData }) {
               )}
             </div>
           </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             <div className="lg:col-span-3">
               {data.summary && (
@@ -845,7 +1023,6 @@ function CreativeInnovationTemplate({ data }: { data: ResumeData }) {
                   </div>
                 </div>
               )}
-
               <div className="mb-12">
                 <h3 className="text-3xl font-black text-gray-900 mb-8 transform -skew-x-6">EXPERIENCE JOURNEY</h3>
                 {data.experience.map((exp: any, index: number) => (
@@ -880,8 +1057,45 @@ function CreativeInnovationTemplate({ data }: { data: ResumeData }) {
                   </div>
                 ))}
               </div>
+              {data.projects && data.projects.length > 0 && (
+                <div className="mb-12">
+                  <h3 className="text-3xl font-black text-gray-900 mb-8 transform -skew-x-6">INNOVATION PROJECTS</h3>
+                  {data.projects.map((project: any, index: number) => (
+                    <div key={index} className="mb-8 last:mb-0">
+                      <div
+                        className={`p-6 transform ${index % 2 === 0 ? "-skew-x-1" : "skew-x-1"} ${
+                          index % 3 === 0
+                            ? "bg-green-50 border-l-8 border-green-400"
+                            : index % 3 === 1
+                              ? "bg-red-50 border-l-8 border-red-500"
+                              : "bg-indigo-50 border-l-8 border-indigo-400"
+                        }`}
+                      >
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <p className="font-black text-xl text-gray-900">{project.name}</p>
+                            {project.technologies && (
+                              <p className="text-lg font-bold text-gray-700">{project.technologies}</p>
+                            )}
+                            {project.link && <p className="text-sm text-gray-600">{project.link}</p>}
+                          </div>
+                          {project.dates && (
+                            <div
+                              className={`px-4 py-2 transform -rotate-3 font-black text-white ${
+                                index % 3 === 0 ? "bg-green-500" : index % 3 === 1 ? "bg-red-500" : "bg-indigo-500"
+                              }`}
+                            >
+                              {project.dates}
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-sm leading-relaxed font-medium">{project.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-
             <div className="lg:col-span-1 space-y-8">
               <div>
                 <h3 className="text-2xl font-black text-gray-900 mb-6 transform -skew-x-6">SKILLS</h3>
@@ -904,7 +1118,6 @@ function CreativeInnovationTemplate({ data }: { data: ResumeData }) {
                   ))}
                 </div>
               </div>
-
               <div>
                 <h3 className="text-2xl font-black text-gray-900 mb-6 transform -skew-x-6">EDUCATION</h3>
                 {data.education.map((edu: any, index: number) => (
@@ -957,14 +1170,12 @@ function MinimalCleanTemplate({ data }: { data: ResumeData }) {
           {data.personalInfo.location && <p>{data.personalInfo.location}</p>}
         </div>
       </div>
-
       {data.summary && (
         <div className="mb-12 pb-8 border-b border-gray-200">
           <h3 className="text-sm uppercase tracking-wider text-gray-500 mb-4">Summary</h3>
           <p className="text-sm leading-relaxed">{data.summary}</p>
         </div>
       )}
-
       <div className="mb-12 pb-8 border-b border-gray-200">
         <h3 className="text-sm uppercase tracking-wider text-gray-500 mb-6">Experience</h3>
         {data.experience.map((exp: any, index: number) => (
@@ -979,7 +1190,22 @@ function MinimalCleanTemplate({ data }: { data: ResumeData }) {
           </div>
         ))}
       </div>
-
+      {data.projects && data.projects.length > 0 && (
+        <div className="mb-12 pb-8 border-b border-gray-200">
+          <h3 className="text-sm uppercase tracking-wider text-gray-500 mb-6">Projects</h3>
+          {data.projects.map((project: any, index: number) => (
+            <div key={index} className="mb-8 last:mb-0">
+              <div className="flex justify-between items-baseline mb-1">
+                <p className="font-medium text-gray-900">{project.name}</p>
+                {project.dates && <p className="text-sm text-gray-500">{project.dates}</p>}
+              </div>
+              {project.technologies && <p className="text-sm text-gray-700 mb-1">{project.technologies}</p>}
+              {project.link && <p className="text-sm text-gray-500 mb-3">{project.link}</p>}
+              <p className="text-sm leading-relaxed text-gray-600">{project.description}</p>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
         <div>
           <h3 className="text-sm uppercase tracking-wider text-gray-500 mb-4">Education</h3>
@@ -1020,14 +1246,12 @@ function MinimalSimplicityTemplate({ data }: { data: ResumeData }) {
           {data.personalInfo.location && <p>{data.personalInfo.location}</p>}
         </div>
       </div>
-
       {data.summary && (
         <div className="mb-16 text-center">
           <h3 className="text-xs uppercase tracking-widest text-gray-400 mb-6">Summary</h3>
           <p className="text-sm leading-loose text-gray-700 max-w-2xl mx-auto">{data.summary}</p>
         </div>
       )}
-
       <div className="mb-16">
         <h3 className="text-xs uppercase tracking-widest text-gray-400 mb-8 text-center">Experience</h3>
         {data.experience.map((exp: any, index: number) => (
@@ -1042,7 +1266,22 @@ function MinimalSimplicityTemplate({ data }: { data: ResumeData }) {
           </div>
         ))}
       </div>
-
+      {data.projects && data.projects.length > 0 && (
+        <div className="mb-16">
+          <h3 className="text-xs uppercase tracking-widest text-gray-400 mb-8 text-center">Projects</h3>
+          {data.projects.map((project: any, index: number) => (
+            <div key={index} className="mb-12 last:mb-0 text-center">
+              <p className="text-lg font-normal text-gray-900 mb-1">{project.name}</p>
+              {project.technologies && <p className="text-sm text-gray-600 mb-1">{project.technologies}</p>}
+              <div className="flex justify-center gap-4 text-xs text-gray-500 mb-4">
+                {project.dates && <p>{project.dates}</p>}
+                {project.link && <p>{project.link}</p>}
+              </div>
+              <p className="text-sm leading-loose text-gray-700 max-w-2xl mx-auto">{project.description}</p>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
         <div className="text-center">
           <h3 className="text-xs uppercase tracking-widest text-gray-400 mb-6">Education</h3>
@@ -1083,14 +1322,12 @@ function MinimalEssentialsTemplate({ data }: { data: ResumeData }) {
           {data.personalInfo.location && <p>{data.personalInfo.location}</p>}
         </div>
       </div>
-
       {data.summary && (
         <div className="mb-6">
           <h3 className="text-sm font-medium text-gray-700 mb-2">Summary</h3>
           <p className="text-sm text-gray-600">{data.summary}</p>
         </div>
       )}
-
       <div className="mb-6">
         <h3 className="text-sm font-medium text-gray-700 mb-3">Experience</h3>
         {data.experience.map((exp: any, index: number) => (
@@ -1105,7 +1342,22 @@ function MinimalEssentialsTemplate({ data }: { data: ResumeData }) {
           </div>
         ))}
       </div>
-
+      {data.projects && data.projects.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-sm font-medium text-gray-700 mb-3">Projects</h3>
+          {data.projects.map((project: any, index: number) => (
+            <div key={index} className="mb-4 last:mb-0">
+              <div className="flex justify-between items-baseline">
+                <p className="font-medium text-gray-900">{project.name}</p>
+                {project.dates && <p className="text-xs text-gray-500">{project.dates}</p>}
+              </div>
+              {project.technologies && <p className="text-sm text-gray-700">{project.technologies}</p>}
+              {project.link && <p className="text-xs text-gray-500">{project.link}</p>}
+              <p className="text-sm text-gray-600 mt-1">{project.description}</p>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2">Education</h3>
@@ -1145,14 +1397,12 @@ function MinimalProTemplate({ data }: { data: ResumeData }) {
           {data.personalInfo.location && <p>{data.personalInfo.location}</p>}
         </div>
       </div>
-
       {data.summary && (
         <div className="mb-20">
           <h3 className="text-xs uppercase tracking-wider text-gray-400 mb-8">Summary</h3>
           <p className="text-sm leading-relaxed text-gray-700 max-w-2xl">{data.summary}</p>
         </div>
       )}
-
       <div className="mb-20">
         <h3 className="text-xs uppercase tracking-wider text-gray-400 mb-12">Experience</h3>
         {data.experience.map((exp: any, index: number) => (
@@ -1167,7 +1417,22 @@ function MinimalProTemplate({ data }: { data: ResumeData }) {
           </div>
         ))}
       </div>
-
+      {data.projects && data.projects.length > 0 && (
+        <div className="mb-20">
+          <h3 className="text-xs uppercase tracking-wider text-gray-400 mb-12">Projects</h3>
+          {data.projects.map((project: any, index: number) => (
+            <div key={index} className="mb-16 last:mb-0">
+              <div className="flex justify-between items-baseline mb-2">
+                <p className="text-lg font-light text-gray-900">{project.name}</p>
+                {project.dates && <p className="text-sm text-gray-400">{project.dates}</p>}
+              </div>
+              {project.technologies && <p className="text-sm text-gray-600 mb-1">{project.technologies}</p>}
+              {project.link && <p className="text-sm text-gray-500 mb-6">{project.link}</p>}
+              <p className="text-sm leading-relaxed text-gray-700 max-w-2xl">{project.description}</p>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-20">
         <div>
           <h3 className="text-xs uppercase tracking-wider text-gray-400 mb-8">Education</h3>
@@ -1208,13 +1473,11 @@ function MinimalWhitespaceTemplate({ data }: { data: ResumeData }) {
           {data.personalInfo.location && <p>{data.personalInfo.location}</p>}
         </div>
       </div>
-
       {data.summary && (
         <div className="mb-32 text-center">
           <p className="text-xs leading-loose text-gray-600 max-w-md mx-auto">{data.summary}</p>
         </div>
       )}
-
       <div className="mb-32">
         {data.experience.map((exp: any, index: number) => (
           <div key={index} className="mb-24 last:mb-0 text-center">
@@ -1225,7 +1488,18 @@ function MinimalWhitespaceTemplate({ data }: { data: ResumeData }) {
           </div>
         ))}
       </div>
-
+      {data.projects && data.projects.length > 0 && (
+        <div className="mb-32">
+          {data.projects.map((project: any, index: number) => (
+            <div key={index} className="mb-24 last:mb-0 text-center">
+              <p className="text-sm font-light text-gray-900 mb-2">{project.name}</p>
+              {project.technologies && <p className="text-xs text-gray-500 mb-1">{project.technologies}</p>}
+              {project.dates && <p className="text-xs text-gray-400 mb-8">{project.dates}</p>}
+              <p className="text-xs leading-loose text-gray-600 max-w-md mx-auto">{project.description}</p>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="text-center space-y-16">
         <div>
           {data.education.map((edu: any, index: number) => (
@@ -1281,7 +1555,6 @@ function ExecutiveLeadershipTemplate({ data }: { data: ResumeData }) {
           {data.personalInfo.location && <p>{data.personalInfo.location}</p>}
         </div>
       </div>
-
       <div className="p-12">
         {data.summary && (
           <div className="mb-12">
@@ -1291,7 +1564,6 @@ function ExecutiveLeadershipTemplate({ data }: { data: ResumeData }) {
             </p>
           </div>
         )}
-
         <div className="mb-12">
           <h3 className="text-2xl font-bold text-gray-900 mb-8 uppercase tracking-wider">Leadership Experience</h3>
           {data.experience.map((exp: any, index: number) => (
@@ -1310,7 +1582,30 @@ function ExecutiveLeadershipTemplate({ data }: { data: ResumeData }) {
             </div>
           ))}
         </div>
-
+        {data.projects && data.projects.length > 0 && (
+          <div className="mb-12">
+            <h3 className="text-2xl font-bold text-gray-900 mb-8 uppercase tracking-wider">Strategic Initiatives</h3>
+            {data.projects.map((project: any, index: number) => (
+              <div key={index} className="mb-10 last:mb-0">
+                <div className="bg-gray-50 p-8 border-l-4 border-gray-600">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <p className="text-xl font-bold text-gray-900">{project.name}</p>
+                      {project.technologies && (
+                        <p className="text-lg font-semibold text-gray-700">{project.technologies}</p>
+                      )}
+                      {project.link && <p className="text-sm text-gray-600">{project.link}</p>}
+                    </div>
+                    {project.dates && (
+                      <span className="text-sm text-white bg-gray-600 px-4 py-2 font-bold">{project.dates}</span>
+                    )}
+                  </div>
+                  <p className="text-sm leading-relaxed text-gray-700">{project.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div>
             <h3 className="text-xl font-bold text-gray-900 mb-6 uppercase tracking-wider">Education</h3>
@@ -1353,7 +1648,6 @@ function ExecutiveCSuiteTemplate({ data }: { data: ResumeData }) {
             {data.personalInfo.location && <p className="flex items-center gap-2">{data.personalInfo.location}</p>}
           </div>
         </div>
-
         <div className="p-12">
           {data.summary && (
             <div className="mb-12">
@@ -1365,7 +1659,6 @@ function ExecutiveCSuiteTemplate({ data }: { data: ResumeData }) {
               </div>
             </div>
           )}
-
           <div className="mb-12">
             <h3 className="text-xl font-bold text-gray-900 mb-8 border-b-2 border-blue-600 pb-2">
               EXECUTIVE EXPERIENCE
@@ -1390,7 +1683,34 @@ function ExecutiveCSuiteTemplate({ data }: { data: ResumeData }) {
               </div>
             ))}
           </div>
-
+          {data.projects && data.projects.length > 0 && (
+            <div className="mb-12">
+              <h3 className="text-xl font-bold text-gray-900 mb-8 border-b-2 border-blue-600 pb-2">
+                STRATEGIC PROJECTS
+              </h3>
+              {data.projects.map((project: any, index: number) => (
+                <div key={index} className="mb-8 last:mb-0">
+                  <div className="bg-white border border-gray-200 p-8 shadow-sm">
+                    <div className="flex justify-between items-start border-b border-gray-200 pb-4 mb-4">
+                      <div>
+                        <p className="text-lg font-bold text-gray-900">{project.name}</p>
+                        {project.technologies && (
+                          <p className="text-md font-semibold text-blue-600">{project.technologies}</p>
+                        )}
+                        {project.link && <p className="text-sm text-gray-600">{project.link}</p>}
+                      </div>
+                      {project.dates && (
+                        <span className="text-sm text-white bg-blue-600 px-4 py-2 font-semibold">{project.dates}</span>
+                      )}
+                    </div>
+                    <div className="bg-blue-50 border-l-4 border-blue-600 p-4">
+                      <p className="text-sm leading-relaxed text-gray-800">{project.description}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div>
               <h3 className="text-xl font-bold text-gray-900 mb-6 border-b-2 border-blue-600 pb-2">
@@ -1441,7 +1761,6 @@ function ExecutiveDirectorTemplate({ data }: { data: ResumeData }) {
             {data.personalInfo.location && <p>{data.personalInfo.location}</p>}
           </div>
         </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             {data.summary && (
@@ -1452,7 +1771,6 @@ function ExecutiveDirectorTemplate({ data }: { data: ResumeData }) {
                 <p className="text-sm leading-relaxed text-gray-700">{data.summary}</p>
               </div>
             )}
-
             <div className="mb-8">
               <h3 className="text-xl font-bold text-gray-800 mb-6 uppercase tracking-wider border-b border-gray-300 pb-2">
                 Professional Experience
@@ -1473,8 +1791,31 @@ function ExecutiveDirectorTemplate({ data }: { data: ResumeData }) {
                 </div>
               ))}
             </div>
+            {data.projects && data.projects.length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-xl font-bold text-gray-800 mb-6 uppercase tracking-wider border-b border-gray-300 pb-2">
+                  Key Projects
+                </h3>
+                {data.projects.map((project: any, index: number) => (
+                  <div key={index} className="mb-8 last:mb-0">
+                    <div className="border-b border-gray-300 pb-2 mb-4">
+                      <div className="flex justify-between items-baseline">
+                        <p className="text-lg font-bold text-gray-800">{project.name}</p>
+                        {project.dates && <p className="text-sm text-gray-600 font-semibold">{project.dates}</p>}
+                      </div>
+                      {project.technologies && (
+                        <p className="text-md font-semibold text-gray-700">{project.technologies}</p>
+                      )}
+                      {project.link && <p className="text-sm text-gray-600">{project.link}</p>}
+                    </div>
+                    <div className="bg-gray-50 p-4 border-l-4 border-gray-600">
+                      <p className="text-sm leading-relaxed text-gray-700">{project.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-
           <div className="lg:col-span-1">
             <div className="mb-8">
               <h3 className="text-lg font-bold text-gray-800 mb-4 uppercase tracking-wider border-b border-gray-300 pb-2">
@@ -1489,7 +1830,6 @@ function ExecutiveDirectorTemplate({ data }: { data: ResumeData }) {
                 </div>
               ))}
             </div>
-
             <div>
               <h3 className="text-lg font-bold text-gray-800 mb-4 uppercase tracking-wider border-b border-gray-300 pb-2">
                 Key Skills
@@ -1524,7 +1864,6 @@ function ExecutiveBoardMemberTemplate({ data }: { data: ResumeData }) {
           </div>
         </div>
       </div>
-
       <div className="p-10">
         <div className="max-w-5xl mx-auto">
           {data.summary && (
@@ -1535,7 +1874,6 @@ function ExecutiveBoardMemberTemplate({ data }: { data: ResumeData }) {
               </div>
             </div>
           )}
-
           <div className="mb-10">
             <h3 className="text-xl font-bold text-gray-900 mb-8 uppercase tracking-wider text-center">
               Board & Executive Experience
@@ -1558,7 +1896,32 @@ function ExecutiveBoardMemberTemplate({ data }: { data: ResumeData }) {
               </div>
             ))}
           </div>
-
+          {data.projects && data.projects.length > 0 && (
+            <div className="mb-10">
+              <h3 className="text-xl font-bold text-gray-900 mb-8 uppercase tracking-wider text-center">
+                Strategic Initiatives
+              </h3>
+              {data.projects.map((project: any, index: number) => (
+                <div key={index} className="mb-8 last:mb-0">
+                  <div className="bg-gray-50 border-2 border-gray-200 p-8">
+                    <div className="text-center mb-6">
+                      <p className="text-lg font-bold text-gray-900">{project.name}</p>
+                      {project.technologies && (
+                        <p className="text-md font-semibold text-gray-700">{project.technologies}</p>
+                      )}
+                      <div className="flex justify-center gap-4 text-sm text-gray-600 mt-2">
+                        {project.dates && <p>{project.dates}</p>}
+                        {project.link && <p>{project.link}</p>}
+                      </div>
+                    </div>
+                    <div className="bg-white border border-gray-200 p-6">
+                      <p className="text-sm leading-relaxed text-gray-800 text-center">{project.description}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div className="text-center">
               <h3 className="text-lg font-bold text-gray-900 mb-6 uppercase tracking-wider">Education & Credentials</h3>
@@ -1607,7 +1970,6 @@ function ExecutiveEliteTemplate({ data }: { data: ResumeData }) {
               )}
             </div>
           </div>
-
           {data.summary && (
             <div className="mb-12">
               <h3 className="text-2xl font-bold text-yellow-400 mb-8 text-center uppercase tracking-wider">
@@ -1618,7 +1980,6 @@ function ExecutiveEliteTemplate({ data }: { data: ResumeData }) {
               </div>
             </div>
           )}
-
           <div className="mb-12">
             <h3 className="text-2xl font-bold text-yellow-400 mb-10 text-center uppercase tracking-wider">
               Elite Experience
@@ -1641,7 +2002,34 @@ function ExecutiveEliteTemplate({ data }: { data: ResumeData }) {
               </div>
             ))}
           </div>
-
+          {data.projects && data.projects.length > 0 && (
+            <div className="mb-12">
+              <h3 className="text-2xl font-bold text-yellow-400 mb-10 text-center uppercase tracking-wider">
+                Elite Projects
+              </h3>
+              {data.projects.map((project: any, index: number) => (
+                <div key={index} className="mb-10 last:mb-0">
+                  <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-8 rounded-lg border border-gray-600">
+                    <div className="text-center mb-6">
+                      <p className="text-xl font-bold text-yellow-400">{project.name}</p>
+                      {project.technologies && (
+                        <p className="text-lg font-semibold text-gray-200">{project.technologies}</p>
+                      )}
+                      <div className="flex justify-center gap-6 text-sm text-gray-400 mt-3">
+                        {project.dates && (
+                          <p className="bg-yellow-400 text-black px-3 py-1 rounded font-bold">{project.dates}</p>
+                        )}
+                        {project.link && <p>{project.link}</p>}
+                      </div>
+                    </div>
+                    <div className="bg-gray-900 p-6 rounded border border-yellow-400/30">
+                      <p className="text-sm leading-relaxed text-gray-200 text-center">{project.description}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div>
               <h3 className="text-xl font-bold text-yellow-400 mb-8 text-center uppercase tracking-wider">

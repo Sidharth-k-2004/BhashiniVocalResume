@@ -1,14 +1,16 @@
-
 // "use client"
-
 // import { useEffect, useState } from "react"
 // import { Button } from "@/components/ui/button"
-// import { ArrowLeft, Download, Share2, Edit } from "lucide-react"
+// import { ArrowLeft, Download, Edit } from "lucide-react"
 // import { useRouter, useSearchParams } from "next/navigation"
 // import { toast } from "@/components/ui/use-toast"
-// import html2canvas from "html2canvas"
-// import jsPDF from "jspdf"
 // import { useRef } from "react"
+// import {
+//   ProfessionalTemplate,
+//   CreativeTemplate,
+//   MinimalTemplate,
+//   ExecutiveTemplate,
+// } from "@/components/resume-templates"
 
 // interface ResumeData {
 //   personalInfo: {
@@ -32,6 +34,13 @@
 //     institution: string
 //     dates: string
 //     location: string
+//   }>
+//   projects?: Array<{
+//     name: string
+//     description: string
+//     technologies?: string
+//     link?: string
+//     dates?: string
 //   }>
 //   skills: string[]
 // }
@@ -89,15 +98,12 @@
 //       try {
 //         // First try to get data from localStorage (from audio processing)
 //         const storedData = localStorage.getItem("resumeData")
-
 //         if (storedData) {
 //           console.log("Found stored data:", storedData)
 //           // Parse the JSON string from localStorage
 //           const parsedData = JSON.parse(storedData)
-
 //           // If the data is wrapped in a "data" property (from your API response)
 //           const resumeJson = parsedData.data ? parsedData.data : parsedData
-
 //           // If the data contains a JSON string (from your backend)
 //           if (typeof resumeJson === "string" && resumeJson.startsWith("json")) {
 //             // Extract the JSON part from the string
@@ -113,7 +119,6 @@
 //           const response = await fetch(`http://localhost:5000/api/resume/${resumeId}`, {
 //             credentials: "include",
 //           })
-
 //           if (response.ok) {
 //             const data = await response.json()
 //             setResumeData(data)
@@ -180,6 +185,24 @@
 //           location: "",
 //         },
 //       ],
+//       projects: [
+//         {
+//           name: "E-Commerce Platform",
+//           description:
+//             "Built a full-stack e-commerce platform with React, Node.js, and MongoDB. Implemented secure payment processing and real-time inventory management.",
+//           technologies: "React, Node.js, MongoDB, Stripe API",
+//           link: "https://github.com/johndoe/ecommerce-platform",
+//           dates: "2023 - Present",
+//         },
+//         {
+//           name: "Task Management App",
+//           description:
+//             "Developed a collaborative task management application with real-time updates and team collaboration features.",
+//           technologies: "Vue.js, Express.js, Socket.io, PostgreSQL",
+//           link: "https://taskmanager-demo.com",
+//           dates: "2022 - 2023",
+//         },
+//       ],
 //       skills: ["JavaScript", "React", "Node.js", "TypeScript", "GraphQL"],
 //     }
 //   }
@@ -187,22 +210,20 @@
 //   const handleDownloadPDF = async () => {
 //     const html2canvas = (await import("html2canvas")).default
 //     const jsPDF = (await import("jspdf")).default
-  
+
 //     const input = document.getElementById("resume-area")
 //     if (!input) return
-  
+
 //     const canvas = await html2canvas(input)
 //     const imgData = canvas.toDataURL("image/png")
-  
 //     const pdf = new jsPDF("p", "mm", "a4")
 //     const imgProps = pdf.getImageProperties(imgData)
 //     const pdfWidth = pdf.internal.pageSize.getWidth()
 //     const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
-  
+
 //     pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight)
 //     pdf.save("resume.pdf")
 //   }
-  
 
 //   const handleEdit = () => {
 //     // If we have a resumeId from the API, use it for editing
@@ -266,10 +287,9 @@
 //       </div>
 
 //       <div className="bg-gray-100 p-8 rounded-lg shadow-inner">
-//       <div id="resume-area" ref={resumeRef} className="max-w-4xl mx-auto bg-white rounded shadow-lg">
-//   {renderTemplate()}
-// </div>
-
+//         <div id="resume-area" ref={resumeRef} className="max-w-4xl mx-auto bg-white rounded shadow-lg">
+//           {renderTemplate()}
+//         </div>
 //       </div>
 
 //       <div className="text-center mt-8">
@@ -288,371 +308,6 @@
 //   )
 // }
 
-// // Professional template variations
-// function ProfessionalTemplate({ variant = "1", data }: { variant: string; data: any }) {
-//   switch (variant) {
-//     case "2":
-//       return <ProfessionalBusinessTemplate data={data} />
-//     default:
-//       return <ProfessionalCorporateTemplate data={data} />
-//   }
-// }
-
-// function ProfessionalCorporateTemplate({ data }: { data: any }) {
-//   return (
-//     <div className="p-8">
-//       <div className="border-b pb-4 mb-6">
-//         <h2 className="text-3xl font-bold">{data.personalInfo.name}</h2>
-//         <p className="text-xl text-gray-600">{data.personalInfo.title}</p>
-//       </div>
-
-//       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-//         <div className="md:col-span-1">
-//           <div className="mb-6">
-//             <h3 className="text-lg font-semibold mb-2">Contact</h3>
-//             {data.personalInfo.email && <p className="text-sm">{data.personalInfo.email}</p>}
-//             {data.personalInfo.phone && <p className="text-sm">{data.personalInfo.phone}</p>}
-//             {data.personalInfo.location && <p className="text-sm">{data.personalInfo.location}</p>}
-//             {data.personalInfo.linkedin && <p className="text-sm">{data.personalInfo.linkedin}</p>}
-//           </div>
-
-//           <div className="mb-6">
-//             <h3 className="text-lg font-semibold mb-2">Skills</h3>
-//             <ul className="list-disc list-inside text-sm">
-//               {data.skills.map((skill: string, index: number) => (
-//                 <li key={index}>{skill}</li>
-//               ))}
-//             </ul>
-//           </div>
-
-//           <div>
-//             <h3 className="text-lg font-semibold mb-2">Education</h3>
-//             {data.education.map((edu: any, index: number) => (
-//               <div key={index} className="mb-3">
-//                 <p className="font-medium">{edu.degree}</p>
-//                 {edu.institution && <p className="text-sm">{edu.institution}</p>}
-//                 {edu.dates && <p className="text-sm text-gray-600">{edu.dates}</p>}
-//                 {edu.location && <p className="text-sm">{edu.location}</p>}
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-
-//         <div className="md:col-span-2">
-//           {data.summary && (
-//             <div className="mb-6">
-//               <h3 className="text-lg font-semibold mb-3">Summary</h3>
-//               <p className="text-sm">{data.summary}</p>
-//             </div>
-//           )}
-
-//           <div className="mb-6">
-//             <h3 className="text-lg font-semibold mb-3">Experience</h3>
-
-//             {data.experience.map((exp: any, index: number) => (
-//               <div key={index} className="mb-4">
-//                 <div className="flex justify-between">
-//                   <p className="font-medium">{exp.title}</p>
-//                   {exp.dates && <p className="text-sm text-gray-600">{exp.dates}</p>}
-//                 </div>
-//                 <p className="text-sm">{exp.company}</p>
-//                 {exp.location && <p className="text-sm text-gray-500">{exp.location}</p>}
-//                 <p className="text-sm mt-2">{exp.description}</p>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
-// function ProfessionalBusinessTemplate({ data }: { data: any }) {
-//   return (
-//     <div className="p-8">
-//       <div className="text-center border-b pb-6 mb-6">
-//         <h2 className="text-4xl font-bold">{data.personalInfo.name}</h2>
-//         <p className="text-xl text-gray-600 mt-2">{data.personalInfo.title}</p>
-
-//         <div className="flex flex-wrap justify-center gap-4 mt-4">
-//           {data.personalInfo.email && <p className="text-sm">{data.personalInfo.email}</p>}
-//           {data.personalInfo.email && data.personalInfo.phone && <span className="text-gray-400">|</span>}
-//           {data.personalInfo.phone && <p className="text-sm">{data.personalInfo.phone}</p>}
-//           {data.personalInfo.phone && data.personalInfo.location && <span className="text-gray-400">|</span>}
-//           {data.personalInfo.location && <p className="text-sm">{data.personalInfo.location}</p>}
-//         </div>
-//       </div>
-
-//       {data.summary && (
-//         <div className="mb-6">
-//           <h3 className="text-lg font-semibold border-b pb-2 mb-3">Summary</h3>
-//           <p className="text-sm">{data.summary}</p>
-//         </div>
-//       )}
-
-//       <div className="grid grid-cols-1 gap-6">
-//         <div>
-//           <h3 className="text-lg font-semibold border-b pb-2 mb-3">Experience</h3>
-//           {data.experience.map((exp: any, index: number) => (
-//             <div key={index} className="mb-5">
-//               <div className="flex justify-between items-center">
-//                 <p className="font-bold text-lg">{exp.title}</p>
-//                 {exp.dates && <p className="text-sm text-gray-600">{exp.dates}</p>}
-//               </div>
-//               <p className="text-md font-medium">{exp.company}</p>
-//               {exp.location && <p className="text-sm text-gray-500">{exp.location}</p>}
-//               <p className="text-sm mt-2">{exp.description}</p>
-//             </div>
-//           ))}
-//         </div>
-
-//         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//           <div>
-//             <h3 className="text-lg font-semibold border-b pb-2 mb-3">Education</h3>
-//             {data.education.map((edu: any, index: number) => (
-//               <div key={index} className="mb-3">
-//                 <p className="font-medium">{edu.degree}</p>
-//                 {edu.institution && <p className="text-sm">{edu.institution}</p>}
-//                 {edu.dates && <p className="text-sm text-gray-600">{edu.dates}</p>}
-//                 {edu.location && <p className="text-sm">{edu.location}</p>}
-//               </div>
-//             ))}
-//           </div>
-
-//           <div>
-//             <h3 className="text-lg font-semibold border-b pb-2 mb-3">Skills</h3>
-//             <div className="flex flex-wrap gap-2">
-//               {data.skills.map((skill: string, index: number) => (
-//                 <span key={index} className="bg-gray-100 px-3 py-1 rounded-full text-sm">
-//                   {skill}
-//                 </span>
-//               ))}
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
-// // Creative template variations
-// function CreativeTemplate({ variant = "1", data }: { variant: string; data: any }) {
-//   return (
-//     <div className="grid grid-cols-1 md:grid-cols-3">
-//       <div className="bg-rose-100 p-8 md:col-span-1">
-//         <div className="mb-8">
-//           <div className="w-32 h-32 bg-rose-200 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl font-bold text-rose-500">
-//             {data.personalInfo.name
-//               .split(" ")
-//               .map((name: string) => name[0])
-//               .join("")}
-//           </div>
-//           <h2 className="text-2xl font-bold text-center">{data.personalInfo.name}</h2>
-//           <p className="text-md text-center text-rose-700 mt-1">{data.personalInfo.title}</p>
-//         </div>
-
-//         <div className="mb-6">
-//           <h3 className="text-lg font-bold text-rose-800 mb-3 border-b border-rose-200 pb-1">Contact</h3>
-//           <div className="space-y-2">
-//             {data.personalInfo.email && <p className="text-sm">{data.personalInfo.email}</p>}
-//             {data.personalInfo.phone && <p className="text-sm">{data.personalInfo.phone}</p>}
-//             {data.personalInfo.location && <p className="text-sm">{data.personalInfo.location}</p>}
-//             {data.personalInfo.linkedin && <p className="text-sm">{data.personalInfo.linkedin}</p>}
-//           </div>
-//         </div>
-
-//         <div className="mb-6">
-//           <h3 className="text-lg font-bold text-rose-800 mb-3 border-b border-rose-200 pb-1">Skills</h3>
-//           <div className="space-y-2">
-//             {data.skills.map((skill: string, index: number) => (
-//               <div key={index} className="bg-white rounded-full px-3 py-1 text-sm">
-//                 {skill}
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-
-//         <div>
-//           <h3 className="text-lg font-bold text-rose-800 mb-3 border-b border-rose-200 pb-1">Education</h3>
-//           {data.education.map((edu: any, index: number) => (
-//             <div key={index} className="mb-3">
-//               <p className="font-medium">{edu.degree}</p>
-//               {edu.institution && <p className="text-sm">{edu.institution}</p>}
-//               {edu.dates && <p className="text-sm text-rose-700">{edu.dates}</p>}
-//               {edu.location && <p className="text-sm">{edu.location}</p>}
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-
-//       <div className="p-8 md:col-span-2">
-//         {data.summary && (
-//           <div className="mb-6">
-//             <h3 className="text-2xl font-bold text-rose-800 mb-4 border-b border-rose-200 pb-2">Summary</h3>
-//             <p className="text-sm">{data.summary}</p>
-//           </div>
-//         )}
-
-//         <div className="mb-6">
-//           <h3 className="text-2xl font-bold text-rose-800 mb-4 border-b border-rose-200 pb-2">Experience</h3>
-//           {data.experience.map((exp: any, index: number) => (
-//             <div key={index} className="mb-6">
-//               <div className="flex justify-between items-baseline">
-//                 <p className="font-bold text-lg">{exp.title}</p>
-//                 {exp.dates && <p className="text-sm text-rose-700">{exp.dates}</p>}
-//               </div>
-//               <p className="text-md italic mb-2">{exp.company}</p>
-//               {exp.location && <p className="text-sm text-rose-500">{exp.location}</p>}
-//               <p className="text-sm mt-2">{exp.description}</p>
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
-// // Minimal template variations
-// function MinimalTemplate({ variant = "1", data }: { variant: string; data: any }) {
-//   return (
-//     <div className="p-8 font-light">
-//       <div className="mb-8">
-//         <h2 className="text-3xl font-normal tracking-wide">{data.personalInfo.name}</h2>
-//         <p className="text-lg text-gray-500 mt-1">{data.personalInfo.title}</p>
-
-//         <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-600">
-//           {data.personalInfo.email && <p>{data.personalInfo.email}</p>}
-//           {data.personalInfo.email && data.personalInfo.phone && <span>•</span>}
-//           {data.personalInfo.phone && <p>{data.personalInfo.phone}</p>}
-//           {data.personalInfo.phone && data.personalInfo.location && <span>•</span>}
-//           {data.personalInfo.location && <p>{data.personalInfo.location}</p>}
-//         </div>
-//       </div>
-
-//       {data.summary && (
-//         <div className="mb-6">
-//           <h3 className="text-md uppercase tracking-wider text-gray-500 mb-3">Summary</h3>
-//           <p className="text-sm">{data.summary}</p>
-//         </div>
-//       )}
-
-//       <div className="grid grid-cols-1 gap-6">
-//         <div>
-//           <h3 className="text-md uppercase tracking-wider text-gray-500 mb-3">Experience</h3>
-//           {data.experience.map((exp: any, index: number) => (
-//             <div key={index} className="mb-5">
-//               <div className="flex justify-between items-baseline">
-//                 <p className="font-medium">{exp.title}</p>
-//                 {exp.dates && <p className="text-sm text-gray-500">{exp.dates}</p>}
-//               </div>
-//               <p className="text-sm">{exp.company}</p>
-//               {exp.location && <p className="text-sm text-gray-500">{exp.location}</p>}
-//               <p className="text-sm mt-2">{exp.description}</p>
-//             </div>
-//           ))}
-//         </div>
-
-//         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//           <div>
-//             <h3 className="text-md uppercase tracking-wider text-gray-500 mb-3">Education</h3>
-//             {data.education.map((edu: any, index: number) => (
-//               <div key={index} className="mb-3">
-//                 <p className="font-medium">{edu.degree}</p>
-//                 {edu.institution && <p className="text-sm">{edu.institution}</p>}
-//                 {edu.dates && <p className="text-sm text-gray-500">{edu.dates}</p>}
-//                 {edu.location && <p className="text-sm">{edu.location}</p>}
-//               </div>
-//             ))}
-//           </div>
-
-//           <div>
-//             <h3 className="text-md uppercase tracking-wider text-gray-500 mb-3">Skills</h3>
-//             <div className="flex flex-wrap gap-2">
-//               {data.skills.map((skill: string, index: number) => (
-//                 <span key={index} className="text-sm">
-//                   {skill}
-//                   {index < data.skills.length - 1 && <span className="ml-1 mr-1">•</span>}
-//                 </span>
-//               ))}
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
-// // Executive template variations
-// function ExecutiveTemplate({ variant = "1", data }: { variant: string; data: any }) {
-//   return (
-//     <div className="p-8 bg-slate-50">
-//       <div className="border-b-4 border-slate-800 pb-6 mb-6">
-//         <h2 className="text-4xl font-bold text-slate-800">{data.personalInfo.name}</h2>
-//         <p className="text-xl text-slate-600 mt-2">{data.personalInfo.title}</p>
-
-//         <div className="flex flex-wrap gap-4 mt-4 text-sm text-slate-700">
-//           {data.personalInfo.email && <p>{data.personalInfo.email}</p>}
-//           {data.personalInfo.email && data.personalInfo.phone && <span>|</span>}
-//           {data.personalInfo.phone && <p>{data.personalInfo.phone}</p>}
-//           {data.personalInfo.phone && data.personalInfo.location && <span>|</span>}
-//           {data.personalInfo.location && <p>{data.personalInfo.location}</p>}
-//         </div>
-//       </div>
-
-//       {data.summary && (
-//         <div className="mb-6">
-//           <h3 className="text-xl font-bold text-slate-800 mb-4 uppercase tracking-wider">Summary</h3>
-//           <p className="text-sm">{data.summary}</p>
-//         </div>
-//       )}
-
-//       <div className="grid grid-cols-1 gap-8">
-//         <div>
-//           <h3 className="text-xl font-bold text-slate-800 mb-4 uppercase tracking-wider">Professional Experience</h3>
-//           {data.experience.map((exp: any, index: number) => (
-//             <div key={index} className="mb-6">
-//               <div className="flex justify-between items-baseline border-b border-slate-300 pb-1 mb-2">
-//                 <p className="font-bold text-lg">{exp.title}</p>
-//                 {exp.dates && <p className="text-sm text-slate-600">{exp.dates}</p>}
-//               </div>
-//               <p className="text-md font-medium mb-2">{exp.company}</p>
-//               {exp.location && <p className="text-sm text-slate-500">{exp.location}</p>}
-//               <p className="text-sm mt-2">{exp.description}</p>
-//             </div>
-//           ))}
-//         </div>
-
-//         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-//           <div>
-//             <h3 className="text-xl font-bold text-slate-800 mb-4 uppercase tracking-wider">Education</h3>
-//             {data.education.map((edu: any, index: number) => (
-//               <div key={index} className="mb-4">
-//                 <p className="font-bold">{edu.degree}</p>
-//                 {edu.institution && <p className="text-sm">{edu.institution}</p>}
-//                 {edu.dates && <p className="text-sm text-slate-600">{edu.dates}</p>}
-//                 {edu.location && <p className="text-sm">{edu.location}</p>}
-//               </div>
-//             ))}
-//           </div>
-
-//           <div>
-//             <h3 className="text-xl font-bold text-slate-800 mb-4 uppercase tracking-wider">Skills & Expertise</h3>
-//             <div className="grid grid-cols-2 gap-2">
-//               {data.skills.map((skill: string, index: number) => (
-//                 <div key={index} className="bg-white border border-slate-200 px-3 py-2 rounded text-sm">
-//                   {skill}
-//                 </div>
-//               ))}
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
-
-
 
 
 
@@ -661,10 +316,11 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Download, Edit } from "lucide-react"
+import { ArrowLeft, Download, Edit, Mic, FileEdit } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "@/components/ui/use-toast"
 import { useRef } from "react"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   ProfessionalTemplate,
   CreativeTemplate,
@@ -695,6 +351,13 @@ interface ResumeData {
     dates: string
     location: string
   }>
+  projects?: Array<{
+    name: string
+    description: string
+    technologies?: string
+    link?: string
+    dates?: string
+  }>
   skills: string[]
 }
 
@@ -703,6 +366,7 @@ export default function ResumePreview() {
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(true)
   const [resumeData, setResumeData] = useState<ResumeData | null>(null)
+  const [showEditModal, setShowEditModal] = useState(false)
   const resumeRef = useRef<HTMLDivElement>(null)
 
   const templateId = searchParams.get("template") || ""
@@ -838,6 +502,24 @@ export default function ResumePreview() {
           location: "",
         },
       ],
+      projects: [
+        {
+          name: "E-Commerce Platform",
+          description:
+            "Built a full-stack e-commerce platform with React, Node.js, and MongoDB. Implemented secure payment processing and real-time inventory management.",
+          technologies: "React, Node.js, MongoDB, Stripe API",
+          link: "https://github.com/johndoe/ecommerce-platform",
+          dates: "2023 - Present",
+        },
+        {
+          name: "Task Management App",
+          description:
+            "Developed a collaborative task management application with real-time updates and team collaboration features.",
+          technologies: "Vue.js, Express.js, Socket.io, PostgreSQL",
+          link: "https://taskmanager-demo.com",
+          dates: "2022 - 2023",
+        },
+      ],
       skills: ["JavaScript", "React", "Node.js", "TypeScript", "GraphQL"],
     }
   }
@@ -845,13 +527,11 @@ export default function ResumePreview() {
   const handleDownloadPDF = async () => {
     const html2canvas = (await import("html2canvas")).default
     const jsPDF = (await import("jspdf")).default
-
     const input = document.getElementById("resume-area")
     if (!input) return
 
     const canvas = await html2canvas(input)
     const imgData = canvas.toDataURL("image/png")
-
     const pdf = new jsPDF("p", "mm", "a4")
     const imgProps = pdf.getImageProperties(imgData)
     const pdfWidth = pdf.internal.pageSize.getWidth()
@@ -862,12 +542,29 @@ export default function ResumePreview() {
   }
 
   const handleEdit = () => {
+    setShowEditModal(true)
+  }
+
+  const handleManualEdit = () => {
+    setShowEditModal(false)
     // If we have a resumeId from the API, use it for editing
     if (resumeData && "id" in resumeData) {
       router.push(`/edit-resume?id=${resumeData.id}`)
     } else {
       // Otherwise just pass the template and category
       router.push(`/edit-resume?template=${templateId}&category=${categoryId}`)
+    }
+  }
+
+  const handleAudioEdit = () => {
+    setShowEditModal(false)
+    // Navigate to audio editing page with current resume data
+    if (resumeData && "id" in resumeData) {
+      router.push(`/audio-edit?id=${resumeData.id}`)
+    } else {
+      // Store current resume data in localStorage for audio editing
+      localStorage.setItem("resumeDataForEdit", JSON.stringify(resumeData))
+      router.push(`/audio-edit?template=${templateId}&category=${categoryId}`)
     }
   }
 
@@ -878,6 +575,7 @@ export default function ResumePreview() {
   // Render the appropriate template based on the template ID
   const renderTemplate = () => {
     if (!resumeData) return null
+
     // First character of template ID indicates the category
     const templateType = templateId.charAt(0)
     const templateNumber = templateId.substring(1)
@@ -939,6 +637,40 @@ export default function ResumePreview() {
           </Button>
         </div>
       </div>
+
+      {/* Edit Options Modal */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl font-semibold">Choose Edit Method</DialogTitle>
+            <DialogDescription className="text-center text-gray-600">
+              How would you like to edit your resume?
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-4 py-4">
+            <Button
+              onClick={handleManualEdit}
+              className="flex items-center justify-center gap-3 h-16 text-base bg-transparent"
+              variant="outline"
+            >
+              <FileEdit className="h-6 w-6" />
+              <div className="text-left">
+                <div className="font-medium">Edit Manually</div>
+                <div className="text-sm text-gray-500">Use forms and text fields</div>
+              </div>
+            </Button>
+
+            <Button onClick={handleAudioEdit} className="flex items-center justify-center gap-3 h-16 text-base">
+              <Mic className="h-6 w-6" />
+              <div className="text-left">
+                <div className="font-medium">Edit Through Audio</div>
+                <div className="text-sm text-gray-100">Speak your changes naturally</div>
+              </div>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
