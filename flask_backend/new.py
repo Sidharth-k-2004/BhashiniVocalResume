@@ -24,6 +24,9 @@ from threading import Thread
 from waitress import serve
 import logging
 import base64
+import jwt
+
+
 
 # Load environment variables from .env file
 from dotenv import load_dotenv
@@ -887,6 +890,78 @@ with app.app_context():
         print("Database tables created successfully")
     except Exception as e:
         print(f"Error creating database tables: {e}")
+
+users_db = {
+    "sidharthkdinesan123@gmail.com": {"name": "Sidharth"}  # Add dummy user for test
+}
+
+
+@app.route('/api/forgot-password', methods=['POST'])
+def forgot_password():
+    data = request.get_json()
+    email = data.get('email')
+
+    if not email:
+        return jsonify({"message": "Email is required"}), 400
+
+    if email not in users_db:
+        return jsonify({"message": "No account found with this email"}), 404
+
+    # ✅ Encode token using PyJWT
+    token = jwt.encode(
+        {
+            'email': email,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
+        },
+        app.config['SECRET_KEY'],
+        algorithm='HS256'
+    )
+
+    reset_url = f"http://localhost:3000/reset-password?token={token}"
+
+    try:
+        send_reset_email(email, reset_url)
+        return jsonify({"message": "Reset link sent to your email"}), 200
+    except Exception as e:
+        return jsonify({"message": f"Failed to send email: {str(e)}"}), 500
+
+def send_reset_email(to_email, reset_link):
+    msg = EmailMessage()
+    msg['Subject'] = 'Reset Your Password'
+    msg['From'] = 'your-email@example.com'
+    msg['To'] = to_email
+    msg.set_content(f"Click the link to reset your password:\n\n{reset_link}")
+
+    # Use App Password from Google (not your regular password)
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+        smtp.login('your-email@example.com', 'your-app-password')  # <-- Replace!
+        smtp.send_message(msg)
+
+@app.route('/api/reset-password', methods=['POST'])
+def reset_password():
+    data = request.get_json()
+    token = data.get('token')
+    new_password = data.get('newPassword')
+
+    if not token or not new_password:
+        return jsonify({"message": "Token and new password are required"}), 400
+
+    try:
+        decoded = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+        email = decoded.get('email')
+
+        if email not in users_db:
+            return jsonify({"message": "Invalid or expired token"}), 400
+
+        # ✅ Update the password
+        users_db[email]['password'] = new_password  # You should hash this in real projects
+
+        return jsonify({"message": "Password has been reset successfully"}), 200
+
+    except jwt.ExpiredSignatureError:
+        return jsonify({"message": "The token has expired"}), 400
+    except jwt.InvalidTokenError:
+        return jsonify({"message": "Invalid token"}), 400
 
 if __name__ == '__main__':
     print("=== System Status ===")
