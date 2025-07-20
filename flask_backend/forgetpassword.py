@@ -41,11 +41,11 @@ CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 app.logger.setLevel(logging.DEBUG)
 
 
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # or your provider
-app.config['MAIL_PORT'] = 587
+app.config['MAIL_SERVER'] = os.environ.get("SMTP_HOST")  
+app.config['MAIL_PORT'] = os.environ.get("SMTP_PORT")  
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'tribolt987@gmail.com'   # ⚠️ replace this
-app.config['MAIL_PASSWORD'] = 'sigt vnrk jeor oexn'    # ⚠️ or app password
+app.config['MAIL_USERNAME'] = os.environ.get("GMAIL_USER")   
+app.config['MAIL_PASSWORD'] = os.environ.get("GMAIL_PASS")   
 
 mail = Mail(app)
 
