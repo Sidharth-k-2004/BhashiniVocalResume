@@ -1,3 +1,4 @@
+
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -81,9 +82,6 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
-# SerpAPI Configuration
-SERPAPI_KEY = os.environ.get("SERPAPI_KEY")
-
 # Bhashini API Configuration - now properly reading from .env
 BHASHINI_USER_ID = os.environ.get("BHASHINI_USER_ID")
 BHASHINI_API_KEY = os.environ.get("BHASHINI_API_KEY")
@@ -93,7 +91,6 @@ BHASHINI_COMPUTE_URL = "https://dhruva-api.bhashini.gov.in/services/inference"
 # Debug: Print loaded environment variables (remove in production)
 print(f"Loaded BHASHINI_USER_ID: {BHASHINI_USER_ID}")
 print(f"Loaded BHASHINI_API_KEY: {BHASHINI_API_KEY[:10]}..." if BHASHINI_API_KEY else "BHASHINI_API_KEY not loaded")
-print(f"Loaded SERPAPI_KEY: {SERPAPI_KEY[:10]}..." if SERPAPI_KEY else "SERPAPI_KEY not loaded")
 
 # Check for FFmpeg
 def check_ffmpeg():
@@ -139,13 +136,13 @@ class PasswordReset(db.Model):
 # Updated Template mapping with string keys
 TEMPLATES = {
     "p1": "Professional Corporate",
-    "p2": "Professional Business",     
+    "p2": "Professional buisness", 
     "p3": "Professional Executive Pro",
     "p4": "Professional Modern Professional",
     "p5": "Professional Classic",
     "c1": "Creative Designer",
     "c2": "Creative Artistic",
-    "c3": "Creative Digital Creative",
+    "c3": "Creative Degital Creative",
     "c4": "Portfolio Plus",
     "c5": "Innovative",
     "m1": "Clean",
@@ -178,167 +175,6 @@ def get_template_style_category(template_id):
     else:
         return 'professional'  # default
 
-# Enhanced Research Paper Search Functions
-def search_papers_with_openrouter(paper_titles):
-    """Search for research papers using OpenRouter API"""
-    if not paper_titles:
-        return []
-    
-    search_prompt = f"""You are a research paper search assistant. I will provide you with research paper titles, and you need to help find their likely publication links.
-
-Paper titles to search for:
-{json.dumps(paper_titles, indent=2)}
-
-For each paper, try to provide:
-1. The most likely DOI link (if available)
-2. Google Scholar link
-3. ArXiv link (if it's a preprint)
-4. Publisher's direct link
-5. Any other relevant academic database links
-
-Return the results in the following JSON format:
-{{
-  "papers": [
-    {{
-      "title": "exact title from input",
-      "links": [
-        {{
-          "type": "DOI",
-          "url": "https://doi.org/...",
-          "description": "Official DOI link"
-        }},
-        {{
-          "type": "Google Scholar",
-          "url": "https://scholar.google.com/...",
-          "description": "Google Scholar page"
-        }},
-        {{
-          "type": "ArXiv",
-          "url": "https://arxiv.org/...",
-          "description": "ArXiv preprint"
-        }}
-      ],
-      "found": true/false
-    }}
-  ]
-}}
-
-If you cannot find specific links for a paper, set "found": false and provide an empty links array.
-Only return valid JSON, no markdown formatting."""
-
-    try:
-        response_text = call_openrouter_api(search_prompt, model="openai/gpt-4o-mini")
-        
-        if not response_text:
-            return []
-        
-        # Clean up the response
-        raw_json_str = response_text.strip()
-        
-        if raw_json_str.startswith("```json"):
-            raw_json_str = re.sub(r"^```json\s*", "", raw_json_str)
-        if raw_json_str.endswith("```"):
-            raw_json_str = raw_json_str[:-3].strip()
-        
-        parsed_result = json.loads(raw_json_str)
-        return parsed_result.get('papers', [])
-        
-    except Exception as e:
-        print(f"Error searching papers with OpenRouter: {e}")
-        return []
-
-def search_papers_with_serpapi(paper_titles):
-    """Search for research papers using SerpAPI as fallback"""
-    if not SERPAPI_KEY or not paper_titles:
-        return []
-    
-    papers_with_links = []
-    
-    for title in paper_titles:
-        try:
-            # Search Google Scholar via SerpAPI
-            params = {
-                'engine': 'google_scholar',
-                'q': title,
-                'api_key': SERPAPI_KEY,
-                'num': 3  # Get top 3 results
-            }
-            
-            response = requests.get('https://serpapi.com/search', params=params, timeout=10)
-            response.raise_for_status()
-            
-            data = response.json()
-            organic_results = data.get('organic_results', [])
-            
-            links = []
-            found = False
-            
-            for result in organic_results:
-                if result.get('link'):
-                    link_info = {
-                        'type': 'Google Scholar',
-                        'url': result['link'],
-                        'description': result.get('title', 'Research paper link')
-                    }
-                    links.append(link_info)
-                    found = True
-                
-                # Check for PDF links
-                if result.get('resources'):
-                    for resource in result['resources']:
-                        if resource.get('link') and 'pdf' in resource.get('title', '').lower():
-                            pdf_link = {
-                                'type': 'PDF',
-                                'url': resource['link'],
-                                'description': 'PDF version'
-                            }
-                            links.append(pdf_link)
-            
-            papers_with_links.append({
-                'title': title,
-                'links': links,
-                'found': found
-            })
-            
-        except Exception as e:
-            print(f"Error searching '{title}' with SerpAPI: {e}")
-            papers_with_links.append({
-                'title': title,
-                'links': [],
-                'found': False
-            })
-    
-    return papers_with_links
-
-def search_research_papers(paper_titles):
-    """Search for research papers using OpenRouter first, then SerpAPI as fallback"""
-    print(f"Searching for papers: {paper_titles}")
-    
-    # Try OpenRouter first
-    papers_with_links = search_papers_with_openrouter(paper_titles)
-    
-    # If OpenRouter didn't find links for some papers, try SerpAPI
-    if SERPAPI_KEY:
-        unfound_papers = []
-        for paper in papers_with_links:
-            if not paper.get('found', False) or not paper.get('links', []):
-                unfound_papers.append(paper['title'])
-        
-        if unfound_papers:
-            print(f"Using SerpAPI fallback for: {unfound_papers}")
-            serpapi_results = search_papers_with_serpapi(unfound_papers)
-            
-            # Merge results
-            for i, paper in enumerate(papers_with_links):
-                if paper['title'] in unfound_papers:
-                    # Find corresponding SerpAPI result
-                    for serpapi_paper in serpapi_results:
-                        if serpapi_paper['title'] == paper['title']:
-                            papers_with_links[i] = serpapi_paper
-                            break
-    
-    return papers_with_links
-
 # Bhashini API Helper Functions
 def get_bhashini_auth_token():
     """Get authentication token from Bhashini"""
@@ -350,6 +186,7 @@ def get_bhashini_auth_token():
         return None
     
     auth_url = f"{BHASHINI_BASE_URL}/ulca/apis/v0/model/getModelsPipeline"
+    
     headers = {
         "userID": BHASHINI_USER_ID,
         "ulcaApiKey": BHASHINI_API_KEY,
@@ -584,7 +421,7 @@ def call_openrouter_api(prompt, model="openai/gpt-4o-mini"):
         return None
 
 def convert_text_to_json(text):
-    """Enhanced function to convert text to JSON with better publication extraction"""
+    """Convert text to JSON using OpenRouter API"""
     resume_structure = {
         "personalInfo": {
             "name": "",
@@ -612,59 +449,22 @@ def convert_text_to_json(text):
                 "location": ""
             }
         ],
-        "skills": [],
-        "publications": [
-            {
-                "title": "",
-                "authors": "",
-                "journal": "",
-                "year": "",
-                "links": []
-            }
-        ]
+        "skills": []
     }
     
-    prompt = f"""You are a professional resume writer with expertise in extracting academic publication information. Extract relevant information from the following transcript and format it into a JSON resume.
+    prompt = f"""You are a professional resume writer. Extract relevant information from the following transcript and format it into a JSON resume.
 
 Here's the transcript: {text}
 
 Please format the response as a valid JSON object with the following structure:
 {json.dumps(resume_structure, indent=2)}
 
-IMPORTANT INSTRUCTIONS FOR PUBLICATIONS:
-1. Pay special attention to any mentions of research papers, publications, academic work, or papers the person has written
-2. When extracting publications, carefully listen for:
-   - Paper titles (often mentioned as "I published a paper called..." or "My paper on..." or "I wrote a paper about...")
-   - Author names (the person speaking is likely one of the authors, but they may mention co-authors)
-   - Publication venues (journal names, conference names like "IEEE", "ACM", "Nature", "CVPR", "ICML", etc.)
-   - Publication years (often mentioned as "in 2023", "last year", "published in 2022", etc.)
-   - Any collaboration mentions ("with my colleague John", "co-authored with", "joint work with")
-
-3. For each publication mentioned:
-   - Extract the exact title as mentioned
-   - Include ALL authors mentioned (if the speaker doesn't mention co-authors, just put their name)
-   - Extract the journal/conference name if mentioned
-   - Extract the publication year if mentioned
-   - Leave the links array empty (will be populated by search function)
-
-4. Common patterns to listen for:
-   - "I published a paper on [topic] in [journal] in [year]"
-   - "My research on [topic] was published in [venue]"
-   - "I co-authored a paper with [names] about [topic]"
-   - "Our paper titled [title] appeared in [venue]"
-   - "I have [number] publications in [field]"
-
-5. If the person mentions multiple papers, create separate entries for each one
-
-6. If specific details are not mentioned, leave those fields empty but still create the publication entry if a paper is mentioned
-
-Fill in all other relevant fields (personal info, experience, education, skills) based on the transcript. If information for a field is not available, leave it empty.
-
+Fill in all relevant fields based on the transcript. If information for a field is not available, leave it empty.
 For the experience and education sections, create as many entries as mentioned in the transcript.
 For skills, extract all relevant skills mentioned.
 
 ONLY return the JSON object, nothing else. Do not include any markdown formatting or code blocks."""
-
+    
     try:
         response_text = call_openrouter_api(prompt, model="openai/gpt-4o-mini")
         
@@ -680,37 +480,6 @@ ONLY return the JSON object, nothing else. Do not include any markdown formattin
             raw_json_str = raw_json_str[:-3].strip()
         
         parsed_json = json.loads(raw_json_str)
-        
-        # Search for publication links if publications are mentioned
-        if parsed_json.get('publications') and len(parsed_json['publications']) > 0:
-            paper_titles = []
-            for pub in parsed_json['publications']:
-                if pub.get('title') and pub['title'].strip():
-                    paper_titles.append(pub['title'])
-            
-            if paper_titles:
-                print(f"Found {len(paper_titles)} publications from audio, searching for links...")
-                print(f"Publication titles: {paper_titles}")
-                
-                # Log the extracted publication details before search
-                for i, pub in enumerate(parsed_json['publications']):
-                    print(f"Publication {i+1}:")
-                    print(f"  Title: {pub.get('title', 'Not specified')}")
-                    print(f"  Authors: {pub.get('authors', 'Not specified')}")
-                    print(f"  Journal: {pub.get('journal', 'Not specified')}")
-                    print(f"  Year: {pub.get('year', 'Not specified')}")
-                
-                papers_with_links = search_research_papers(paper_titles)
-                
-                # Update publications with found links (preserve existing author/year info)
-                for i, pub in enumerate(parsed_json['publications']):
-                    for paper in papers_with_links:
-                        if paper['title'] == pub['title']:
-                            # Only update links, preserve author and year info from audio
-                            pub['links'] = paper.get('links', [])
-                            print(f"Added {len(pub['links'])} links to publication: {pub['title']}")
-                            break
-        
         return parsed_json
         
     except json.JSONDecodeError as e:
@@ -753,7 +522,7 @@ def generate_pdf(resume_data, template_id):
             spaceAfter=6
         )
         normal_style = styles['Normal']
-        
+    
     elif style_category == "creative":
         title_style = ParagraphStyle(
             'Title',
@@ -770,7 +539,7 @@ def generate_pdf(resume_data, template_id):
             spaceAfter=6
         )
         normal_style = styles['Normal']
-        
+    
     elif style_category == "minimal":
         title_style = ParagraphStyle(
             'Title',
@@ -787,7 +556,7 @@ def generate_pdf(resume_data, template_id):
             spaceAfter=6
         )
         normal_style = styles['Normal']
-        
+    
     else:  # executive
         title_style = ParagraphStyle(
             'Title',
@@ -881,44 +650,6 @@ def generate_pdf(resume_data, template_id):
                 if location:
                     date_loc.append(location)
                 elements.append(Paragraph(' | '.join(date_loc), normal_style))
-            
-            elements.append(Spacer(1, 0.1 * inch))
-        
-        elements.append(Spacer(1, 0.1 * inch))
-    
-    # Publications - Enhanced with author names and years
-    if resume_data.get('publications') and len(resume_data['publications']) > 0:
-        elements.append(Paragraph('PUBLICATIONS', heading_style))
-        for pub in resume_data['publications']:
-            title = pub.get('title', '')
-            authors = pub.get('authors', '')
-            journal = pub.get('journal', '')
-            year = pub.get('year', '')
-            links = pub.get('links', [])
-            
-            # Publication title
-            if title:
-                elements.append(Paragraph(f"<b>{title}</b>", normal_style))
-            
-            # Authors and publication details
-            pub_info = []
-            if authors:
-                pub_info.append(f"Authors: {authors}")
-            if journal:
-                pub_info.append(f"Published in: {journal}")
-            if year:
-                pub_info.append(f"Year: {year}")
-            
-            if pub_info:
-                elements.append(Paragraph(' | '.join(pub_info), normal_style))
-            
-            # Links
-            if links:
-                link_texts = []
-                for link in links:
-                    link_text = f"<a href='{link['url']}'>{link['type']}</a>"
-                    link_texts.append(link_text)
-                elements.append(Paragraph(f"Links: {' | '.join(link_texts)}", normal_style))
             
             elements.append(Spacer(1, 0.1 * inch))
         
@@ -1040,7 +771,7 @@ def process_audio():
         
         print(f"Transcript: {transcript}")
         
-        # Convert the transcription to JSON using OpenRouter with enhanced publication extraction
+        # Convert the transcription to JSON using OpenRouter
         response_json = convert_text_to_json(transcript)
         
         if not response_json:
@@ -1190,34 +921,19 @@ def process_audio_edit():
             os.remove(converted_audio_path)
 
 def apply_audio_edits_to_resume(transcript, current_resume_data):
-    """Enhanced function to apply audio edit commands to resume data with better publication handling"""
+    """Apply audio edit commands to resume data using OpenRouter API"""
     
     prompt = f"""You are a professional resume editor AI. You will receive a voice command transcript and current resume data in JSON format. Your task is to:
 
 1. Understand the editing instructions from the transcript
 2. Apply the requested changes to the resume data
-3. If the user mentions research papers or publications, extract ALL details mentioned (title, authors, journal, year) and add to publications section
-4. Return the updated resume data and a list of changes made
+3. Return the updated resume data and a list of changes made
 
 Current Resume Data:
 {json.dumps(current_resume_data, indent=2)}
 
 Voice Command Transcript:
 "{transcript}"
-
-IMPORTANT INSTRUCTIONS FOR PUBLICATION EDITS:
-- If the user mentions adding a publication, extract:
-  * Paper title (exactly as mentioned)
-  * Authors (including the user and any co-authors mentioned)
-  * Journal/conference name (if mentioned)
-  * Publication year (if mentioned)
-  * Leave links array empty for now (will be populated by search)
-
-- Common patterns to listen for:
-  * "Add my paper on [topic]"
-  * "I published a paper called [title] with [authors] in [journal] in [year]"
-  * "Include my research on [topic] published in [venue]"
-  * "Add the paper I co-authored with [names]"
 
 Please analyze the voice command and apply the requested changes to the resume data. Return your response in the following JSON format:
 
@@ -1250,31 +966,17 @@ Please analyze the voice command and apply the requested changes to the resume d
         "location": ""
       }}
     ],
-    "skills": [],
-    "publications": [
-      {{
-        "title": "",
-        "authors": "",
-        "journal": "",
-        "year": "",
-        "links": []
-      }}
-    ]
+    "skills": []
   }},
   "changes": [
     {{
       "type": "add|remove|modify",
-      "section": "skills|personalInfo|experience|education|summary|publications",
+      "section": "skills|personalInfo|experience|education|summary",
       "field": "specific field name if applicable",
       "oldValue": "previous value if modified/removed",
       "newValue": "new value if added/modified",
       "description": "Human readable description of the change"
     }}
-  ],
-  "publicationsToSearch": [
-    // Array of publication titles that need link searching
-    "Paper Title 1",
-    "Paper Title 2"
   ]
 }}
 
@@ -1287,16 +989,12 @@ Examples of commands you should handle:
 - "Add a new skill called Machine Learning" -> Add to skills array
 - "Remove my second job" -> Remove the second item from experience array
 - "Update my summary to say I'm passionate about AI" -> Modify the summary field
-- "I published a paper called 'Deep Learning in Healthcare' with John Smith in IEEE Transactions in 2023" -> Add to publications section with all details
-- "Add my research paper on Machine Learning Algorithms published in Nature last year" -> Add to publications section
-- "Include the paper I co-authored with Maria Garcia on Computer Vision" -> Add to publications section
 
 IMPORTANT: 
 - Only return valid JSON, no markdown formatting or code blocks
 - Preserve all existing data that wasn't mentioned in the command
 - For skills, always return an array of strings
 - Be precise about which changes you made
-- If publications are mentioned, extract ALL available details (title, authors, journal, year)
 - If the command is unclear or cannot be executed, explain in the changes array"""
 
     try:
@@ -1327,22 +1025,6 @@ IMPORTANT:
             skills = parsed_result['updatedData']['skills']
             if isinstance(skills, str):
                 parsed_result['updatedData']['skills'] = [s.strip() for s in skills.split(',') if s.strip()]
-        
-        # Search for publication links if new publications were added
-        publications_to_search = parsed_result.get('publicationsToSearch', [])
-        if publications_to_search:
-            print(f"Searching for publication links: {publications_to_search}")
-            papers_with_links = search_research_papers(publications_to_search)
-            
-            # Update publications with found links (preserve existing author/year info from audio)
-            if 'publications' in parsed_result['updatedData']:
-                for pub in parsed_result['updatedData']['publications']:
-                    for paper in papers_with_links:
-                        if paper['title'] == pub['title']:
-                            # Only update links, preserve author and year info from audio
-                            pub['links'] = paper.get('links', [])
-                            print(f"Added {len(pub['links'])} links to publication: {pub['title']}")
-                            break
         
         return parsed_result
         
@@ -1440,27 +1122,6 @@ def get_templates():
     
     return jsonify({'templates': template_list}), 200
 
-# New endpoint to manually search for research papers
-@app.route('/api/search-publications', methods=['POST'])
-@jwt_required()
-def search_publications():
-    """Manually search for research paper links"""
-    data = request.json
-    paper_titles = data.get('titles', [])
-    
-    if not paper_titles:
-        return jsonify({'message': 'No paper titles provided'}), 400
-    
-    try:
-        papers_with_links = search_research_papers(paper_titles)
-        return jsonify({
-            'message': 'Search completed',
-            'papers': papers_with_links
-        }), 200
-        
-    except Exception as e:
-        return jsonify({'message': f'Error searching publications: {str(e)}'}), 500
-
 # Test endpoints
 @app.route('/api/test-bhashini', methods=['GET'])
 def test_bhashini():
@@ -1475,44 +1136,15 @@ def test_bhashini():
     else:
         return jsonify({'message': 'Failed to connect to Bhashini API'}), 500
 
-@app.route('/api/test-serpapi', methods=['GET'])
-def test_serpapi():
-    """Test endpoint to check SerpAPI connectivity"""
-    if not SERPAPI_KEY:
-        return jsonify({'message': 'SerpAPI key not configured'}), 400
-    
-    try:
-        # Test search with a simple query
-        params = {
-            'engine': 'google_scholar',
-            'q': 'machine learning',
-            'api_key': SERPAPI_KEY,
-            'num': 1
-        }
-        
-        response = requests.get('https://serpapi.com/search', params=params, timeout=10)
-        response.raise_for_status()
-        
-        return jsonify({
-            'message': 'SerpAPI connection successful',
-            'status': response.status_code
-        }), 200
-        
-    except Exception as e:
-        return jsonify({'message': f'SerpAPI test failed: {str(e)}'}), 500
-
 @app.route('/api/system-status', methods=['GET'])
 def system_status():
     """Check system status"""
     return jsonify({
         'ffmpeg_available': ffmpeg_available,
         'bhashini_configured': bool(BHASHINI_USER_ID and BHASHINI_API_KEY),
-        'serpapi_configured': bool(SERPAPI_KEY),
-        'openrouter_configured': bool(OPENROUTER_API_KEY),
         'database_type': 'SQLite' if 'sqlite' in app.config['SQLALCHEMY_DATABASE_URI'] else 'MySQL',
         'bhashini_user_id': BHASHINI_USER_ID,
         'bhashini_api_key_set': bool(BHASHINI_API_KEY),
-        'serpapi_key_set': bool(SERPAPI_KEY),
         'available_templates': list(TEMPLATES.keys()),
         'template_count': len(TEMPLATES)
     }), 200
@@ -1597,15 +1229,11 @@ if __name__ == '__main__':
     print("=== System Status ===")
     print(f"FFmpeg available: {ffmpeg_available}")
     print(f"Bhashini configured: {bool(BHASHINI_USER_ID and BHASHINI_API_KEY)}")
-    print(f"SerpAPI configured: {bool(SERPAPI_KEY)}")
-    print(f"OpenRouter configured: {bool(OPENROUTER_API_KEY)}")
     print(f"Database: {'SQLite' if 'sqlite' in app.config['SQLALCHEMY_DATABASE_URI'] else 'MySQL'}")
     if BHASHINI_USER_ID:
         print(f"Bhashini User ID: {BHASHINI_USER_ID}")
     if BHASHINI_API_KEY:
         print(f"Bhashini API Key: {BHASHINI_API_KEY[:10]}...")
-    if SERPAPI_KEY:
-        print(f"SerpAPI Key: {SERPAPI_KEY[:10]}...")
     print(f"Available Templates: {list(TEMPLATES.keys())}")
     print("====================")
     
