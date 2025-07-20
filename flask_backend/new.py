@@ -28,9 +28,6 @@ import base64
 import jwt
 from flask_mail import Mail, Message
 
-
-
-
 # Load environment variables from .env file
 from dotenv import load_dotenv
 load_dotenv()
@@ -39,13 +36,11 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 app.logger.setLevel(logging.DEBUG)
 
-
 app.config['MAIL_SERVER'] = os.environ.get("SMTP_HOST")  
 app.config['MAIL_PORT'] = os.environ.get("SMTP_PORT")  
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.environ.get("GMAIL_USER")   
 app.config['MAIL_PASSWORD'] = os.environ.get("GMAIL_PASS")   
-
 mail = Mail(app)
 
 # Configuration
@@ -68,7 +63,6 @@ app.config['JWT_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
 app.config['JWT_COOKIE_CSRF_PROTECT'] = False  # Set to True in production
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(hours=24)
 app.config['UPLOAD_FOLDER'] = 'uploads'
-
 
 # Initialize extensions
 db = SQLAlchemy(app)
@@ -139,7 +133,7 @@ class PasswordReset(db.Model):
 # Updated Template mapping with string keys
 TEMPLATES = {
     "p1": "Professional Corporate",
-    "p2": "Professional Business",     
+    "p2": "Professional Business",         
     "p3": "Professional Executive Pro",
     "p4": "Professional Modern Professional",
     "p5": "Professional Classic",
@@ -183,7 +177,7 @@ def search_papers_with_openrouter(paper_titles):
     """Search for research papers using OpenRouter API"""
     if not paper_titles:
         return []
-    
+        
     search_prompt = f"""You are a research paper search assistant. I will provide you with research paper titles, and you need to help find their likely publication links.
 
 Paper titles to search for:
@@ -251,7 +245,7 @@ def search_papers_with_serpapi(paper_titles):
     """Search for research papers using SerpAPI as fallback"""
     if not SERPAPI_KEY or not paper_titles:
         return []
-    
+        
     papers_with_links = []
     
     for title in paper_titles:
@@ -504,10 +498,15 @@ def convert_audio_for_bhashini(audio_file_path):
         audio = audio.set_channels(1)  # Mono
         audio = audio.set_frame_rate(16000)  # 16kHz sampling rate
         
-        # Create temporary WAV file
-        wav_path = audio_file_path.replace(os.path.splitext(audio_file_path)[1], "_converted.wav")
+        # Create temporary WAV file with proper path handling
+        base_name = os.path.splitext(os.path.basename(audio_file_path))[0]
+        temp_dir = os.path.dirname(audio_file_path)
+        wav_path = os.path.join(temp_dir, f"{base_name}_converted.wav")
+        
+        # Export the converted audio
         audio.export(wav_path, format="wav")
         
+        print(f"Audio converted successfully: {wav_path}")
         return wav_path
         
     except Exception as e:
@@ -655,7 +654,6 @@ IMPORTANT INSTRUCTIONS FOR PUBLICATIONS:
    - "I have [number] publications in [field]"
 
 5. If the person mentions multiple papers, create separate entries for each one
-
 6. If specific details are not mentioned, leave those fields empty but still create the publication entry if a paper is mentioned
 
 Fill in all other relevant fields (personal info, experience, education, skills) based on the transcript. If information for a field is not available, leave it empty.
@@ -934,6 +932,280 @@ def generate_pdf(resume_data, template_id):
     doc.build(elements)
     
     return pdf_path
+
+# Add these new endpoints to your Flask backend (app.py)
+@app.route('/api/process-guided-audio', methods=['POST'])
+@jwt_required()
+def process_guided_audio():
+    """Process audio for guided mode - transcribe and extract answer for specific question"""
+    current_user_id = get_jwt_identity()
+    
+    if 'audio' not in request.files:
+        return jsonify({'message': 'No audio file provided'}), 400
+    
+    audio_file = request.files['audio']
+    question = request.form.get('question', '')
+    question_id = request.form.get('questionId', '')
+    language = request.form.get('language', 'en')
+    
+    if not audio_file.filename:
+        return jsonify({'message': 'No audio file selected'}), 400
+    
+    # Save the uploaded file temporarily
+    file_ext = os.path.splitext(audio_file.filename)[1]
+    audio_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{uuid.uuid4()}{file_ext}")
+    audio_file.save(audio_path)
+    
+    converted_audio_path = None
+    transcript = None
+    
+    try:
+        # Try Bhashini first if configured
+        if BHASHINI_USER_ID and BHASHINI_API_KEY:
+            print("Attempting transcription with Bhashini...")
+            converted_audio_path = convert_audio_for_bhashini(audio_path)
+            if converted_audio_path:
+                transcript = transcribe_with_bhashini(converted_audio_path, language)
+        
+        # Fallback to Google Speech Recognition if Bhashini fails
+        if not transcript:
+            print("Bhashini failed or not configured. Falling back to Google Speech Recognition...")
+            transcript = transcribe_with_google_fallback(audio_path)
+        
+        if not transcript:
+            return jsonify({'message': 'Failed to transcribe audio'}), 500
+        
+        print(f"Transcript for question {question_id}: {transcript}")
+        
+        # Process the transcript to extract a clean answer for the specific question
+        processed_answer = process_guided_transcript(transcript, question, question_id)
+        
+        return jsonify({
+            'message': 'Audio processed successfully',
+            'transcript': transcript,
+            'answer': processed_answer,
+            'questionId': question_id
+        }), 200
+        
+    except Exception as e:
+        app.logger.error(f"Error: {e}")
+        return jsonify({'message': f'Error processing audio: {str(e)}'}), 500
+        
+    finally:
+        # Clean up temporary files
+        if os.path.exists(audio_path):
+            os.remove(audio_path)
+        if converted_audio_path and os.path.exists(converted_audio_path):
+            os.remove(converted_audio_path)
+
+def process_guided_transcript(transcript, question, question_id):
+    """Process transcript to extract clean answer for guided questions"""
+    
+    prompt = f"""You are helping to extract a clean, direct answer from a user's audio response to a specific resume question.
+
+Question asked: "{question}"
+User's audio response: "{transcript}"
+
+Please extract and return ONLY the direct answer to the question, cleaned up and formatted appropriately. 
+
+Guidelines:
+- Remove filler words (um, uh, like, you know, etc.)
+- Remove conversational elements that don't answer the question
+- Keep the answer concise but complete
+- For personal info (name, email, phone), format properly
+- For skills, separate with commas if multiple mentioned
+- For experience/education, keep it structured but concise
+- If the user didn't provide a clear answer, return the original transcript
+
+Question ID: {question_id}
+
+Return only the cleaned answer, nothing else:"""
+
+    try:
+        response_text = call_openrouter_api(prompt, model="openai/gpt-4o-mini")
+        
+        if not response_text:
+            return transcript
+        
+        # Clean up the response
+        cleaned_answer = response_text.strip()
+        
+        # Remove any quotes if the AI wrapped the response
+        if cleaned_answer.startswith('"') and cleaned_answer.endswith('"'):
+            cleaned_answer = cleaned_answer[1:-1]
+        
+        return cleaned_answer
+        
+    except Exception as e:
+        print(f"Error processing guided transcript: {e}")
+        return transcript
+
+@app.route('/api/generate-guided-resume', methods=['POST'])
+@jwt_required()
+def generate_guided_resume():
+    """Generate resume from guided mode answers"""
+    current_user_id = get_jwt_identity()
+    
+    data = request.json
+    answers = data.get('answers', {})
+    template_id = data.get('templateId', 'p1')
+    category_id = data.get('categoryId', '1')
+    
+    if not answers:
+        return jsonify({'message': 'No answers provided'}), 400
+    
+    try:
+        # Convert guided answers to structured resume data
+        resume_data = convert_guided_answers_to_resume(answers)
+        
+        if not resume_data:
+            return jsonify({'message': 'Failed to process answers'}), 500
+        
+        # Create a new resume entry in the database
+        new_resume = Resume(
+            user_id=current_user_id,
+            template_id=template_id,
+            template_name=TEMPLATES.get(template_id, "Professional Classic"),
+            resume_data=json.dumps(resume_data)
+        )
+        db.session.add(new_resume)
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Resume generated successfully',
+            'resumeId': new_resume.id,
+            'data': resume_data
+        }), 201
+        
+    except Exception as e:
+        app.logger.error(f"Error generating guided resume: {e}")
+        return jsonify({'message': f'Error generating resume: {str(e)}'}), 500
+
+def convert_guided_answers_to_resume(answers):
+    """Convert guided mode answers to structured resume JSON"""
+    
+    # Create the prompt for converting answers to resume structure
+    answers_text = "\n".join([f"{key}: {value}" for key, value in answers.items() if value.strip()])
+    
+    resume_structure = {
+        "personalInfo": {
+            "name": "",
+            "title": "",
+            "email": "",
+            "phone": "",
+            "location": "",
+            "linkedin": ""
+        },
+        "summary": "",
+        "experience": [
+            {
+                "title": "",
+                "company": "",
+                "dates": "",
+                "location": "",
+                "description": ""
+            }
+        ],
+        "education": [
+            {
+                "degree": "",
+                "institution": "",
+                "dates": "",
+                "location": ""
+            }
+        ],
+        "projects": [
+            {
+                "name": "",
+                "description": "",
+                "technologies": "",
+                "link": "",
+                "dates": ""
+            }
+        ],
+        "publications": [
+            {
+                "title": "",
+                "authors": "",
+                "journal": "",
+                "year": "",
+                "links": []
+            }
+        ],
+        "skills": []
+    }
+    
+    prompt = f"""You are a professional resume writer. Convert the following guided interview answers into a structured JSON resume format.
+
+Guided Interview Answers:
+{answers_text}
+
+Please format the response as a valid JSON object with the following structure:
+{json.dumps(resume_structure, indent=2)}
+
+IMPORTANT INSTRUCTIONS:
+1. PERSONAL INFO: Extract name, title, email, phone, location, and linkedin from the answers
+2. SUMMARY: Use the professional summary answer directly, or create one from other answers if not provided
+3. SKILLS: Convert the skills answer into an array of individual skills
+4. EXPERIENCE: Parse work experience descriptions into structured entries with title, company, dates, location, and description
+5. EDUCATION: Parse education information into structured entries
+6. PROJECTS: If projects are mentioned, structure them appropriately
+7. PUBLICATIONS: If publications/research papers are mentioned, extract titles, authors, journals, years, and leave links empty
+
+PARSING GUIDELINES:
+- For experience: Look for job titles, company names, date ranges, and responsibilities
+- For education: Extract degree types, institution names, and graduation dates
+- For skills: Split comma-separated skills into individual array items
+- For dates: Format consistently (e.g., "2020 - 2023", "Jan 2020 - Present")
+- If information is missing for a section, use empty strings or empty arrays
+- For publications: Pay special attention to research papers, articles, or academic work mentioned
+
+ONLY return the JSON object, nothing else. Do not include any markdown formatting or code blocks."""
+
+    try:
+        response_text = call_openrouter_api(prompt, model="openai/gpt-4o-mini")
+        
+        if not response_text:
+            return None
+        
+        # Clean up the response
+        raw_json_str = response_text.strip()
+        
+        if raw_json_str.startswith("```json"):
+            raw_json_str = re.sub(r"^```json\s*", "", raw_json_str)
+        if raw_json_str.endswith("```"):
+            raw_json_str = raw_json_str[:-3].strip()
+        
+        parsed_json = json.loads(raw_json_str)
+        
+        # Search for publication links if publications are mentioned
+        if parsed_json.get('publications') and len(parsed_json['publications']) > 0:
+            paper_titles = []
+            for pub in parsed_json['publications']:
+                if pub.get('title') and pub['title'].strip():
+                    paper_titles.append(pub['title'])
+            
+            if paper_titles:
+                print(f"Found {len(paper_titles)} publications from guided answers, searching for links...")
+                papers_with_links = search_research_papers(paper_titles)
+                
+                # Update publications with found links
+                for i, pub in enumerate(parsed_json['publications']):
+                    for paper in papers_with_links:
+                        if paper['title'] == pub['title']:
+                            pub['links'] = paper.get('links', [])
+                            print(f"Added {len(pub['links'])} links to publication: {pub['title']}")
+                            break
+        
+        return parsed_json
+        
+    except json.JSONDecodeError as e:
+        print(f"Error parsing JSON: {e}")
+        print(f"Raw response: {response_text}")
+        return None
+    except Exception as e:
+        print(f"Error in convert_guided_answers_to_resume: {e}")
+        return None
 
 # Routes
 @app.route('/api/signup', methods=['POST'])
@@ -1362,7 +1634,7 @@ def delete_resume(resume_id):
     resume = Resume.query.filter_by(id=resume_id, user_id=current_user_id).first()
     
     if not resume:
-        return jsonify({'message': 'Resume not found'}), 404
+        return jsonify({'message':  'Resume not found'}), 404
     
     db.session.delete(resume)
     db.session.commit()
@@ -1537,17 +1809,14 @@ def request_password_reset():
     user = User.query.filter_by(email=email).first()
     if not user:
         return jsonify({'error': 'User not found'}), 404
-
     reset_key = str(random.randint(100000, 999999))
     msg = Message('Your Password Reset Key', sender=app.config['MAIL_USERNAME'], recipients=[email])
     msg.body = f'Your password reset key is {reset_key}'
     mail.send(msg)
-
     PasswordReset.query.filter_by(email=email).delete()
     reset_entry = PasswordReset(email=email, reset_key=reset_key)
     db.session.add(reset_entry)
     db.session.commit()
-
     return jsonify({'message': 'Reset key sent to your email'})
 
 # Verify reset key
@@ -1561,38 +1830,28 @@ def verify_reset_key():
         return jsonify({'error': 'Invalid or expired key'}), 400
     return jsonify({'message': 'Key verified'})
 
-
 @app.route('/api/reset-password', methods=['POST'])
 def reset_password():
     data = request.get_json()
-
     email = data.get('email')
     key = data.get('key')
     new_password = data.get('newPassword')
-
     if not all([email, key, new_password]):
         return jsonify({'error': 'Missing fields'}), 400
-
     # Verify key
     record = PasswordReset.query.filter_by(email=email, reset_key=key).first()
     if not record:
         return jsonify({'error': 'Invalid or expired reset key'}), 400
-
     # Reset password
     user = User.query.filter_by(email=email).first()
     if not user:
         return jsonify({'error': 'User not found'}), 404
-
     user.password = generate_password_hash(new_password)
     PasswordReset.query.filter_by(email=email).delete()
     db.session.commit()
-
     return jsonify({'message': 'Password successfully reset'}), 200
 
-
 # Reset password
-
-
 if __name__ == '__main__':
     print("=== System Status ===")
     print(f"FFmpeg available: {ffmpeg_available}")

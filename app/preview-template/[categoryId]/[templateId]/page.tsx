@@ -1,8 +1,10 @@
 "use client"
+
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, MessageSquare, Mic } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   ProfessionalTemplate,
   CreativeTemplate,
@@ -10,8 +12,13 @@ import {
   ExecutiveTemplate,
 } from "@/components/resume-templates"
 
-export default function PreviewTemplate({ params }: { params: { categoryId: string; templateId: string } }) {
+export default function PreviewTemplate({
+  params,
+}: {
+  params: { categoryId: string; templateId: string }
+}) {
   const [isLoading, setIsLoading] = useState(true)
+  const [showModeSelection, setShowModeSelection] = useState(false)
   const router = useRouter()
   const { categoryId, templateId } = params
 
@@ -193,8 +200,18 @@ export default function PreviewTemplate({ params }: { params: { categoryId: stri
   }, [])
 
   const handleSelectTemplate = () => {
-    // Navigate to the audio input page with the selected template
-    router.push(`/audio-input?template=${templateId}&category=${categoryId}`)
+    setShowModeSelection(true)
+  }
+
+  const handleModeSelection = (mode: "guided" | "freeform") => {
+    setShowModeSelection(false)
+    if (mode === "guided") {
+      // Navigate to guided input page
+      router.push(`/guided-input?template=${templateId}&category=${categoryId}`)
+    } else {
+      // Navigate to the audio input page for freeform mode
+      router.push(`/audio-input?template=${templateId}&category=${categoryId}&mode=${mode}`)
+    }
   }
 
   const handleGoBack = () => {
@@ -217,7 +234,6 @@ export default function PreviewTemplate({ params }: { params: { categoryId: stri
     // First character of template ID indicates the category
     const templateType = templateId.charAt(0)
     const templateNumber = templateId.substring(1)
-
     switch (templateType) {
       case "p":
         return <ProfessionalTemplate variant={templateNumber} data={sampleData} />
@@ -252,8 +268,7 @@ export default function PreviewTemplate({ params }: { params: { categoryId: stri
 
       <div className="text-center mt-8">
         <p className="text-gray-600 mb-4">
-          Like this template? Select it and record your resume details to generate your personalized resume with
-          publications.
+          Like this template? Select it and choose how you'd like to provide your resume information.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button onClick={handleSelectTemplate}>Select This Template</Button>
@@ -262,6 +277,51 @@ export default function PreviewTemplate({ params }: { params: { categoryId: stri
           </Button>
         </div>
       </div>
+
+      {/* Mode Selection Modal */}
+      <Dialog open={showModeSelection} onOpenChange={setShowModeSelection}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl font-semibold">Choose Your Input Mode</DialogTitle>
+            <DialogDescription className="text-center text-gray-600">
+              How would you like to provide your resume information?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <Button
+              onClick={() => handleModeSelection("guided")}
+              className="h-auto p-6 flex flex-col items-center gap-3 text-left"
+              variant="outline"
+            >
+              <MessageSquare className="h-8 w-8 text-blue-600" />
+              <div>
+                <div className="font-semibold text-lg">Guided Mode</div>
+                <div className="text-sm text-gray-600 mt-1">We'll ask you questions step by step</div>
+                <div className="text-xs text-gray-500 mt-2">Perfect for structured input with guided prompts</div>
+              </div>
+            </Button>
+            <Button
+              onClick={() => handleModeSelection("freeform")}
+              className="h-auto p-6 flex flex-col items-center gap-3 text-left"
+              variant="outline"
+            >
+              <Mic className="h-8 w-8 text-green-600" />
+              <div>
+                <div className="font-semibold text-lg">Freeform Mode</div>
+                <div className="text-sm text-gray-600 mt-1">Speak everything in your own flow</div>
+                <div className="text-xs text-gray-500 mt-2">
+                  Ideal for natural conversation and detailed explanations
+                </div>
+              </div>
+            </Button>
+          </div>
+          <div className="text-center">
+            <Button variant="ghost" onClick={() => setShowModeSelection(false)} className="text-sm">
+              Cancel
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
