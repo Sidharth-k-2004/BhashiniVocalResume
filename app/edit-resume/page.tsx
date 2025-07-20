@@ -90,6 +90,7 @@ export default function EditResumePage() {
       experience: Array.isArray(data.experience) ? data.experience : [],
       education: Array.isArray(data.education) ? data.education : [],
       projects: Array.isArray(data.projects) ? data.projects : [],
+      publications: Array.isArray(data.publications) ? data.publications : [], // Add publications
       skills: Array.isArray(data.skills) ? data.skills : [""],
       personalInfo: data.personalInfo || {
         name: "",
@@ -131,7 +132,8 @@ export default function EditResumePage() {
           location: "",
         },
       ],
-      projects: [], // Added projects array
+      projects: [],
+      publications: [], // Add empty publications array
       skills: [""],
     }
   }
@@ -155,6 +157,50 @@ export default function EditResumePage() {
     setResumeData({
       ...resumeData,
       [section]: newArray,
+    })
+  }
+
+  const handlePublicationLinkChange = (pubIndex: number, linkIndex: number, field: string, value: string) => {
+    const newPublications = [...(resumeData.publications || [])]
+    const newLinks = [...(newPublications[pubIndex].links || [])]
+    newLinks[linkIndex] = {
+      ...newLinks[linkIndex],
+      [field]: value,
+    }
+    newPublications[pubIndex] = {
+      ...newPublications[pubIndex],
+      links: newLinks,
+    }
+    setResumeData({
+      ...resumeData,
+      publications: newPublications,
+    })
+  }
+
+  const addPublicationLink = (pubIndex: number) => {
+    const newPublications = [...(resumeData.publications || [])]
+    const currentLinks = Array.isArray(newPublications[pubIndex].links) ? newPublications[pubIndex].links : []
+    newPublications[pubIndex] = {
+      ...newPublications[pubIndex],
+      links: [...currentLinks, { type: "", url: "", description: "" }],
+    }
+    setResumeData({
+      ...resumeData,
+      publications: newPublications,
+    })
+  }
+
+  const removePublicationLink = (pubIndex: number, linkIndex: number) => {
+    const newPublications = [...(resumeData.publications || [])]
+    const newLinks = [...(newPublications[pubIndex].links || [])]
+    newLinks.splice(linkIndex, 1)
+    newPublications[pubIndex] = {
+      ...newPublications[pubIndex],
+      links: newLinks,
+    }
+    setResumeData({
+      ...resumeData,
+      publications: newPublications,
     })
   }
 
@@ -297,7 +343,6 @@ export default function EditResumePage() {
           )}
         </Button>
       </div>
-
       <div className="space-y-8">
         {/* Personal Information */}
         <Card>
@@ -598,6 +643,123 @@ export default function EditResumePage() {
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Project
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Publications */}
+        <Card>
+          <CardContent className="pt-6">
+            <h2 className="text-xl font-semibold mb-4">Publications & Research</h2>
+            {resumeData.publications &&
+              resumeData.publications.map((pub: any, index: number) => (
+                <div key={index} className="mb-6 pb-6 border-b last:border-0">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-medium">Publication {index + 1}</h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => removeArrayItem("publications", index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2 md:col-span-2">
+                      <label className="text-sm font-medium">Publication Title</label>
+                      <Input
+                        value={pub.title || ""}
+                        onChange={(e) => handleArrayItemChange("publications", index, "title", e.target.value)}
+                        placeholder="e.g., Deep Learning Applications in Healthcare"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Authors</label>
+                      <Input
+                        value={pub.authors || ""}
+                        onChange={(e) => handleArrayItemChange("publications", index, "authors", e.target.value)}
+                        placeholder="e.g., John Doe, Jane Smith, et al."
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Journal/Conference</label>
+                      <Input
+                        value={pub.journal || ""}
+                        onChange={(e) => handleArrayItemChange("publications", index, "journal", e.target.value)}
+                        placeholder="e.g., IEEE Transactions on Medical Imaging"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Publication Year</label>
+                      <Input
+                        value={pub.year || ""}
+                        onChange={(e) => handleArrayItemChange("publications", index, "year", e.target.value)}
+                        placeholder="e.g., 2023"
+                      />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                      <label className="text-sm font-medium">Publication Links</label>
+                      {pub.links &&
+                        pub.links.map((link: any, linkIndex: number) => (
+                          <div key={linkIndex} className="flex gap-2 items-end">
+                            <div className="flex-1 grid grid-cols-3 gap-2">
+                              <Input
+                                placeholder="Link Type (e.g., DOI, PDF)"
+                                value={link.type || ""}
+                                onChange={(e) => handlePublicationLinkChange(index, linkIndex, "type", e.target.value)}
+                              />
+                              <Input
+                                placeholder="URL"
+                                value={link.url || ""}
+                                onChange={(e) => handlePublicationLinkChange(index, linkIndex, "url", e.target.value)}
+                              />
+                              <Input
+                                placeholder="Description (optional)"
+                                value={link.description || ""}
+                                onChange={(e) =>
+                                  handlePublicationLinkChange(index, linkIndex, "description", e.target.value)
+                                }
+                              />
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-500 hover:text-red-700"
+                              onClick={() => removePublicationLink(index, linkIndex)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2 bg-transparent"
+                        onClick={() => addPublicationLink(index)}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Link
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            <Button
+              variant="outline"
+              className="w-full mt-4 bg-transparent"
+              onClick={() =>
+                addArrayItem("publications", {
+                  title: "",
+                  authors: "",
+                  journal: "",
+                  year: "",
+                  links: [],
+                })
+              }
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Publication
             </Button>
           </CardContent>
         </Card>

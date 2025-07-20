@@ -51,62 +51,138 @@ export default function PreviewTemplate({ params }: { params: { categoryId: stri
     e5: "Executive Elite",
   }
 
-  // Sample data for preview - NOW INCLUDING PROJECTS
+  // Sample data for preview - NOW INCLUDING PUBLICATIONS
   const sampleData = {
     personalInfo: {
-      name: "John Doe",
-      title: "Software Engineer",
-      email: "john.doe@example.com",
+      name: "Dr. Sarah Johnson",
+      title: "Senior Research Scientist & AI Engineer",
+      email: "sarah.johnson@example.com",
       phone: "(555) 123-4567",
       location: "San Francisco, CA",
     },
     summary:
-      "Experienced software engineer with a passion for building scalable web applications and leading high-performing teams.",
+      "Experienced research scientist and AI engineer with 8+ years in machine learning, computer vision, and healthcare applications. Published 15+ peer-reviewed papers and led cross-functional teams in developing innovative AI solutions.",
     experience: [
       {
-        title: "Senior Software Engineer",
+        title: "Senior Research Scientist",
         company: "Tech Innovations Inc.",
         dates: "2021 - Present",
         location: "San Francisco, CA",
         description:
-          "Led development of company's flagship product. Managed team of 5 engineers. Implemented CI/CD pipeline reducing deployment time by 40%.",
+          "Led development of AI-powered medical imaging solutions. Managed team of 8 researchers. Published 6 papers in top-tier conferences. Secured $2M in research funding.",
       },
       {
-        title: "Software Engineer",
-        company: "Digital Solutions LLC",
+        title: "AI Research Engineer",
+        company: "Digital Health Solutions",
         dates: "2019 - 2021",
         location: "Remote",
         description:
-          "Developed responsive web applications using React. Collaborated with design team to implement UI/UX improvements. Optimized database queries resulting in 30% performance improvement.",
+          "Developed machine learning models for healthcare applications. Collaborated with medical professionals to implement AI solutions. Published 4 research papers and filed 2 patents.",
       },
     ],
     education: [
       {
-        degree: "Computer Science, BS",
+        degree: "Ph.D. in Computer Science",
         institution: "Stanford University",
         dates: "2015 - 2019",
         location: "Stanford, CA",
       },
+      {
+        degree: "M.S. in Machine Learning",
+        institution: "MIT",
+        dates: "2013 - 2015",
+        location: "Cambridge, MA",
+      },
     ],
     projects: [
       {
-        name: "E-Commerce Platform",
+        name: "AI-Powered Medical Diagnosis System",
         description:
-          "Built a full-stack e-commerce platform with React, Node.js, and MongoDB. Implemented secure payment processing and real-time inventory management.",
-        technologies: "React, Node.js, MongoDB, Stripe API",
-        link: "https://github.com/johndoe/ecommerce-platform",
+          "Developed a deep learning system for automated medical image analysis with 95% accuracy. Implemented using TensorFlow and deployed on cloud infrastructure.",
+        technologies: "Python, TensorFlow, AWS, Docker",
+        link: "https://github.com/sarahjohnson/medical-ai",
         dates: "2023 - Present",
       },
       {
-        name: "Task Management App",
+        name: "Computer Vision for Autonomous Vehicles",
         description:
-          "Developed a collaborative task management application with real-time updates and team collaboration features.",
-        technologies: "Vue.js, Express.js, Socket.io, PostgreSQL",
-        link: "https://taskmanager-demo.com",
+          "Built real-time object detection and tracking system for autonomous driving applications using state-of-the-art computer vision techniques.",
+        technologies: "PyTorch, OpenCV, CUDA, ROS",
+        link: "https://autonomous-vision-demo.com",
         dates: "2022 - 2023",
       },
     ],
-    skills: ["JavaScript", "React", "Node.js", "TypeScript", "GraphQL", "Python"],
+    publications: [
+      {
+        title: "Deep Learning Applications in Medical Image Analysis: A Comprehensive Survey",
+        authors: "Sarah Johnson, Michael Chen, David Rodriguez",
+        journal: "IEEE Transactions on Medical Imaging",
+        year: "2023",
+        links: [
+          {
+            type: "DOI",
+            url: "https://doi.org/10.1109/TMI.2023.1234567",
+            description: "Official DOI link",
+          },
+          {
+            type: "PDF",
+            url: "https://arxiv.org/pdf/2023.12345.pdf",
+            description: "ArXiv preprint",
+          },
+          {
+            type: "Google Scholar",
+            url: "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=abc123&citation_for_view=abc123:def456",
+            description: "Google Scholar page",
+          },
+        ],
+      },
+      {
+        title: "Automated Diagnosis of Skin Cancer Using Convolutional Neural Networks",
+        authors: "Sarah Johnson, Lisa Wang, Robert Kim",
+        journal: "Nature Medicine",
+        year: "2022",
+        links: [
+          {
+            type: "DOI",
+            url: "https://doi.org/10.1038/s41591-022-01234-5",
+            description: "Nature Medicine publication",
+          },
+          {
+            type: "Supplementary",
+            url: "https://static-content.springer.com/esm/art%3A10.1038%2Fs41591-022-01234-5/MediaObjects/supplementary.pdf",
+            description: "Supplementary materials",
+          },
+        ],
+      },
+      {
+        title: "Federated Learning for Privacy-Preserving Healthcare AI",
+        authors: "Sarah Johnson, Alex Thompson, Maria Garcia, James Wilson",
+        journal: "Proceedings of ICML 2022",
+        year: "2022",
+        links: [
+          {
+            type: "ArXiv",
+            url: "https://arxiv.org/abs/2022.06789",
+            description: "ArXiv preprint",
+          },
+          {
+            type: "Conference",
+            url: "https://proceedings.mlr.press/v162/johnson22a.html",
+            description: "ICML proceedings",
+          },
+        ],
+      },
+    ],
+    skills: [
+      "Machine Learning",
+      "Deep Learning",
+      "Computer Vision",
+      "Python",
+      "TensorFlow",
+      "PyTorch",
+      "Research",
+      "Publications",
+    ],
   }
 
   useEffect(() => {
@@ -167,7 +243,7 @@ export default function PreviewTemplate({ params }: { params: { categoryId: stri
         <h1 className="text-3xl font-bold">
           {categoryNames[categoryId] || "Template"} - {templateNames[templateId] || "Preview"}
         </h1>
-        <p className="text-gray-600 mt-2">Template Preview</p>
+        <p className="text-gray-600 mt-2">Template Preview with Sample Publications</p>
       </div>
 
       <div className="bg-gray-100 p-8 rounded-lg shadow-inner">
@@ -176,7 +252,8 @@ export default function PreviewTemplate({ params }: { params: { categoryId: stri
 
       <div className="text-center mt-8">
         <p className="text-gray-600 mb-4">
-          Like this template? Select it and record your resume details to generate your personalized resume.
+          Like this template? Select it and record your resume details to generate your personalized resume with
+          publications.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button onClick={handleSelectTemplate}>Select This Template</Button>
