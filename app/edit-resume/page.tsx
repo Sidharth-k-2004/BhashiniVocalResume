@@ -248,61 +248,136 @@ export default function EditResumePage() {
     })
   }
 
+  // const handleSaveResume = async () => {
+  //   setIsSaving(true)
+  //   try {
+  //     if (resumeId) {
+  //       // If we have a resumeId, update via API
+  //       try {
+  //         const response = await fetch(`http://localhost:5000/api/resume/${resumeId}`, {
+  //           method: "PUT",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //           },
+  //           body: JSON.stringify(resumeData),
+  //           credentials: "include",
+  //         })
+  //         if (response.ok) {
+  //           toast({
+  //             title: "Resume updated",
+  //             description: "Your resume has been updated successfully.",
+  //           })
+  //         } else {
+  //           throw new Error("Failed to update resume via API")
+  //         }
+  //       } catch (error) {
+  //         console.error("API update error:", error)
+  //         // Fall back to localStorage
+  //         localStorage.setItem("resumeData", JSON.stringify(resumeData))
+  //         toast({
+  //           title: "Resume saved locally",
+  //           description: "Your resume has been saved to your browser.",
+  //         })
+  //       }
+  //     } else {
+  //       // No resumeId, save to localStorage
+  //       localStorage.setItem("resumeData", JSON.stringify(resumeData))
+  //       toast({
+  //         title: "Resume saved locally",
+  //         description: "Your resume has been saved to your browser.",
+  //       })
+  //     }
+  //     // Navigate to preview
+  //     if (resumeId) {
+  //       router.push(`/resume-preview?id=${resumeId}`)
+  //     } else {
+  //       router.push(`/resume-preview?template=${templateId}&category=${categoryId}`)
+  //     }
+  //   } catch (error) {
+  //     toast({
+  //       title: "Error",
+  //       description: "An error occurred while saving your resume.",
+  //       variant: "destructive",
+  //     })
+  //   } finally {
+  //     setIsSaving(false)
+  //   }
+  // }
+
   const handleSaveResume = async () => {
-    setIsSaving(true)
-    try {
-      if (resumeId) {
-        // If we have a resumeId, update via API
-        try {
-          const response = await fetch(`http://localhost:5000/api/resume/${resumeId}`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(resumeData),
-            credentials: "include",
-          })
-          if (response.ok) {
-            toast({
-              title: "Resume updated",
-              description: "Your resume has been updated successfully.",
-            })
-          } else {
-            throw new Error("Failed to update resume via API")
-          }
-        } catch (error) {
-          console.error("API update error:", error)
-          // Fall back to localStorage
-          localStorage.setItem("resumeData", JSON.stringify(resumeData))
-          toast({
-            title: "Resume saved locally",
-            description: "Your resume has been saved to your browser.",
-          })
+  setIsSaving(true)
+  try {
+    // Use resumeId if present, else try to get it from localStorage
+    let effectiveResumeId = resumeId
+    if (!effectiveResumeId) {
+      const stored = localStorage.getItem("resumeData")
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (parsed.resumeId) {
+          effectiveResumeId = parsed.resumeId
         }
-      } else {
-        // No resumeId, save to localStorage
+      }
+    }
+
+    if (effectiveResumeId) {
+      // If we have a resumeId (either from state or localStorage), update via API
+      try {
+        const response = await fetch(`http://localhost:5000/api/resume/${effectiveResumeId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(resumeData),
+          credentials: "include",
+        })
+        if (response.ok) {
+          localStorage.setItem("resumeData", JSON.stringify(resumeData))
+  //       toast({
+  //         title: "Resume saved locally",
+  //         description: "Your resume has been saved to your browser.",
+  //       })
+          toast({
+            title: "Resume updated",
+            description: "Your resume has been updated successfully.",
+          })
+        } else {
+          throw new Error("Failed to update resume via API")
+        }
+      } catch (error) {
+        console.error("API update error:", error)
+        // Fall back to localStorage
         localStorage.setItem("resumeData", JSON.stringify(resumeData))
         toast({
           title: "Resume saved locally",
           description: "Your resume has been saved to your browser.",
         })
       }
-      // Navigate to preview
-      if (resumeId) {
-        router.push(`/resume-preview?id=${resumeId}`)
-      } else {
-        router.push(`/resume-preview?template=${templateId}&category=${categoryId}`)
-      }
-    } catch (error) {
+    } else {
+      // No resumeId at all, save to localStorage
+      localStorage.setItem("resumeData", JSON.stringify(resumeData))
       toast({
-        title: "Error",
-        description: "An error occurred while saving your resume.",
-        variant: "destructive",
+        title: "Resume saved locally",
+        description: "Your resume has been saved to your browser.",
       })
-    } finally {
-      setIsSaving(false)
     }
+
+    // Navigate to preview
+    if (effectiveResumeId) {
+      router.push(`/resume-preview?id=${effectiveResumeId}`)
+    } else {
+      router.push(`/resume-preview?template=${templateId}&category=${categoryId}`)
+    }
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: "An error occurred while saving your resume.",
+      variant: "destructive",
+    })
+  } finally {
+    setIsSaving(false)
   }
+}
+
 
   if (isLoading) {
     return (

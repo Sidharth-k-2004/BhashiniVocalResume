@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { use, useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, MessageSquare, Mic } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -12,15 +12,18 @@ import {
   ExecutiveTemplate,
 } from "@/components/resume-templates"
 
+
 export default function PreviewTemplate({
   params,
 }: {
-  params: { categoryId: string; templateId: string }
+  // params: { categoryId: string; templateId: string }
+   params: Promise<{ categoryId: string; templateId: string }>
 }) {
   const [isLoading, setIsLoading] = useState(true)
   const [showModeSelection, setShowModeSelection] = useState(false)
   const router = useRouter()
-  const { categoryId, templateId } = params
+  // const { categoryId, templateId } = params
+  const { categoryId, templateId } = use(params)
 
   // Template categories mapping for display purposes
   const categoryNames: Record<string, string> = {

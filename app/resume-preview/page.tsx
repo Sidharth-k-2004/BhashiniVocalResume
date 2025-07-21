@@ -1080,6 +1080,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import html2pdf from "html2pdf.js";
+
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Download, Edit, Mic, FileEdit, Lightbulb, CheckCircle, AlertCircle, Info } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -1096,7 +1098,7 @@ import {
   MinimalTemplate,
   ExecutiveTemplate,
 } from "@/components/resume-templates"
-
+import jsPDF from "jspdf";
 interface ResumeData {
   personalInfo: {
     name: string
@@ -1160,6 +1162,14 @@ export default function ResumePreview() {
     "3": "Minimal",
     "4": "Executive",
   }
+
+
+  useEffect(() => {
+    // Dynamically import html2pdf only in browser
+    import('html2pdf.js').then((html2pdf) => {
+      (window as any).html2pdf = html2pdf.default;
+    });
+  }, []);
 
   // Template names mapping
   const templateNames: Record<string, string> = {
@@ -1500,23 +1510,44 @@ export default function ResumePreview() {
     }
   }
 
-  const handleDownloadPDF = async () => {
-    const html2canvas = (await import("html2canvas")).default
-    const jsPDF = (await import("jspdf")).default
+  // const handleDownloadPDF = async () => {
+  //   const html2canvas = (await import("html2canvas")).default
+  //   const jsPDF = (await import("jspdf")).default
 
-    const input = document.getElementById("resume-area")
-    if (!input) return
+  //   const input = document.getElementById("resume-area")
+  //   if (!input) return
 
-    const canvas = await html2canvas(input)
-    const imgData = canvas.toDataURL("image/png")
-    const pdf = new jsPDF("p", "mm", "a4")
-    const imgProps = pdf.getImageProperties(imgData)
-    const pdfWidth = pdf.internal.pageSize.getWidth()
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
+  //   const canvas = await html2canvas(input)
+  //   const imgData = canvas.toDataURL("image/png")
+  //   const pdf = new jsPDF("p", "mm", "a4")
+  //   const imgProps = pdf.getImageProperties(imgData)
+  //   const pdfWidth = pdf.internal.pageSize.getWidth()
+  //   const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
 
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight)
-    pdf.save("resume.pdf")
-  }
+  //   pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight)
+  //   pdf.save("resume.pdf")
+  // }
+  
+
+ const handleDownloadPDF = async () => {
+    const element = document.getElementById('pdf-content');
+    if (!element) return;
+
+    const opt = {
+      margin:       0.3,
+      filename:     'resume.pdf',
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2 },
+      jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+
+    try {
+      await (window as any).html2pdf().set(opt).from(element).save();
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+    }
+  };
+
 
   const handleEdit = () => {
     setShowEditModal(true)
