@@ -1530,7 +1530,7 @@ export default function ResumePreview() {
   
 
  const handleDownloadPDF = async () => {
-    const element = document.getElementById('pdf-content');
+    const element = document.getElementById('resume-area');
     if (!element) return;
 
     const opt = {
