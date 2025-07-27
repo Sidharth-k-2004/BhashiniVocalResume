@@ -1510,26 +1510,8 @@ export default function ResumePreview() {
     }
   }
 
-  // const handleDownloadPDF = async () => {
-  //   const html2canvas = (await import("html2canvas")).default
-  //   const jsPDF = (await import("jspdf")).default
-
-  //   const input = document.getElementById("resume-area")
-  //   if (!input) return
-
-  //   const canvas = await html2canvas(input)
-  //   const imgData = canvas.toDataURL("image/png")
-  //   const pdf = new jsPDF("p", "mm", "a4")
-  //   const imgProps = pdf.getImageProperties(imgData)
-  //   const pdfWidth = pdf.internal.pageSize.getWidth()
-  //   const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
-
-  //   pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight)
-  //   pdf.save("resume.pdf")
-  // }
-  
-
- const handleDownloadPDF = async () => {
+ 
+  const handleDownloadPDF = async () => {
     const element = document.getElementById('resume-area');
     if (!element) return;
 
