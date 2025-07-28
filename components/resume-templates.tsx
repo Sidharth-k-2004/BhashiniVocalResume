@@ -1988,23 +1988,23 @@ function MinimalMinimalistProTemplate({ data }: { data: ResumeData }) {
 //   )
 // }
 
-// // Executive template variations (5 unique designs)
-// export function ExecutiveTemplate({ variant = "1", data }: { variant: string; data: ResumeData }) {
-//   switch (variant) {
-//     case "1":
-//       return <ExecutiveLeadershipTemplate data={data} />
-//     case "2":
-//       return <ExecutiveCSuiteTemplate data={data} />
-//     case "3":
-//       return <ExecutiveDirectorTemplate data={data} />
-//     case "4":
-//       return <ExecutiveBoardMemberTemplate data={data} />
-//     case "5":
-//       return <ExecutiveEliteTemplate data={data} />
-//     default:
-//       return <ExecutiveLeadershipTemplate data={data} />
-//   }
-// }
+// Executive template variations (5 unique designs)
+export function ExecutiveTemplate({ variant = "1", data }: { variant: string; data: ResumeData }) {
+  switch (variant) {
+    case "1":
+      return <ExecutiveLeadershipTemplate data={data} />
+    case "2":
+      return <ExecutiveCSuiteTemplate data={data} />
+    case "3":
+      return <ExecutiveDirectorTemplate data={data} />
+    case "4":
+      return <ExecutiveBoardMemberTemplate data={data} />
+    case "5":
+      return <ExecutiveEliteTemplate data={data} />
+    default:
+      return <ExecutiveLeadershipTemplate data={data} />
+  }
+}
 
 
 function MinimalWhitespaceTemplate({ data }: { data: ResumeData }) {
