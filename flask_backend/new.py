@@ -1569,7 +1569,14 @@ IMPORTANT:
 - For skills, always return an array of strings
 - Be precise about which changes you made
 - If publications are mentioned, extract ALL available details (title, authors, journal, year)
-- If the command is unclear or cannot be executed, explain in the changes array"""
+- If the command is unclear or cannot be executed, explain in the changes array
+
+IMPORTANT JSON RULES:
+- Do not repeat any keys like "changes", "skills", "publications", etc.
+- Do not include trailing commas.
+- Only return valid, parsable JSON — no duplicate keys, invalid formatting, or malformed structures.
+- Ensure "email" values are in correct format, e.g., "shatty@gmail.com" (not "shatty at gmail.com").
+- Only one JSON object should be returned with keys: updatedData, changes, publicationsToSearch."""
 
     try:
         response_text = call_openrouter_api(prompt, model="openai/gpt-4o-mini")

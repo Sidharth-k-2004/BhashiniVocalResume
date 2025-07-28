@@ -7,6 +7,10 @@ interface ResumeData {
     email: string
     phone: string
     location: string
+    address: string
+    summary?: string // for "Career"
+    languages?: string // for "Informations"
+    hobbies?: string
     linkedin?: string
   }
   summary: string
@@ -746,101 +750,239 @@ function CreativeDesignerTemplate({ data }: { data: ResumeData }) {
 }
 
 // C2: Artistic - Hand-drawn elements and unique typography
+// function CreativeArtisticTemplate({ data }: { data: ResumeData }) {
+//   return (
+//     <div className="p-8 bg-yellow-50">
+//       <div className="bg-white rounded-lg shadow-xl overflow-hidden">
+//         <div className="p-8">
+//           <h2 className="text-3xl font-bold text-green-800">{data.personalInfo.name}</h2>
+//           <p className="text-xl text-yellow-700">{data.personalInfo.title}</p>
+//         </div>
+//         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-8">
+//           <div className="md:col-span-1">
+//             <h3 className="text-lg font-semibold text-green-800 mb-3">Contact</h3>
+//             <p className="text-sm text-gray-700">{data.personalInfo.email}</p>
+//             <p className="text-sm text-gray-700">{data.personalInfo.phone}</p>
+//             <p className="text-sm text-gray-700">{data.personalInfo.location}</p>
+//             {data.personalInfo.linkedin && <p className="text-sm text-gray-700">{data.personalInfo.linkedin}</p>}
+//             <h3 className="text-lg font-semibold text-green-800 mt-4 mb-3">Skills</h3>
+//             <ul className="list-disc list-inside text-sm text-gray-700">
+//               {data.skills.map((skill: string, index: number) => (
+//                 <li key={index}>{skill}</li>
+//               ))}
+//             </ul>
+//             <h3 className="text-lg font-semibold text-green-800 mt-4 mb-3">Education</h3>
+//             {data.education.map((edu: any, index: number) => (
+//               <div key={index} className="mb-3">
+//                 <p className="font-medium text-gray-800">{edu.degree}</p>
+//                 <p className="text-sm text-gray-700">{edu.institution}</p>
+//                 <p className="text-sm text-gray-700">{edu.dates}</p>
+//                 <p className="text-sm text-gray-700">{edu.location}</p>
+//               </div>
+//             ))}
+//           </div>
+//           <div className="md:col-span-2">
+//             <h3 className="text-lg font-semibold text-green-800 mb-3">Summary</h3>
+//             <p className="text-sm text-gray-700">{data.summary}</p>
+//             <h3 className="text-lg font-semibold text-green-800 mt-4 mb-3">Experience</h3>
+//             {data.experience.map((exp: any, index: number) => (
+//               <div key={index} className="mb-4">
+//                 <p className="font-medium text-gray-800">{exp.title}</p>
+//                 <p className="text-sm text-yellow-700">{exp.company}</p>
+//                 <p className="text-sm text-gray-700">{exp.dates}</p>
+//                 <p className="text-sm text-gray-700">{exp.location}</p>
+//                 <p className="text-sm text-gray-700">{exp.description}</p>
+//               </div>
+//             ))}
+//             {data.projects && data.projects.length > 0 && (
+//               <div>
+//                 <h3 className="text-lg font-semibold text-green-800 mt-4 mb-3">Projects</h3>
+//                 {data.projects.map((project: any, index: number) => (
+//                   <div key={index} className="mb-4">
+//                     <p className="font-medium text-gray-800">{project.name}</p>
+//                     <p className="text-sm text-yellow-700">{project.technologies}</p>
+//                     <p className="text-sm text-gray-700">{project.description}</p>
+//                     {project.link && (
+//                       <a href={project.link} className="text-sm text-blue-500">
+//                         {project.link}
+//                       </a>
+//                     )}
+//                   </div>
+//                 ))}
+//               </div>
+//             )}
+//             {data.publications && data.publications.length > 0 && (
+//               <div>
+//                 <h3 className="text-lg font-semibold text-green-800 mt-4 mb-3">Publications</h3>
+//                 {data.publications.map((pub: any, index: number) => (
+//                   <div key={index} className="mb-4">
+//                     <p className="font-medium text-gray-800">{pub.title}</p>
+//                     <p className="text-sm text-gray-700">Authors: {pub.authors}</p>
+//                     <p className="text-sm text-gray-700">Journal: {pub.journal}</p>
+//                     <p className="text-sm text-gray-700">Year: {pub.year}</p>
+//                     {pub.links && pub.links.length > 0 && (
+//                       <div>
+//                         <p className="text-sm font-medium text-green-700">Links:</p>
+//                         {pub.links.map((link: any, linkIndex: number) => (
+//                           <a
+//                             key={linkIndex}
+//                             href={link.url}
+//                             target="_blank"
+//                             rel="noopener noreferrer"
+//                             className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+//                           >
+//                             {link.type}
+//                           </a>
+//                         ))}
+//                       </div>
+//                     )}
+//                   </div>
+//                 ))}
+//               </div>
+//             )}
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
+
+
 function CreativeArtisticTemplate({ data }: { data: ResumeData }) {
   return (
-    <div className="p-8 bg-yellow-50">
-      <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-        <div className="p-8">
-          <h2 className="text-3xl font-bold text-green-800">{data.personalInfo.name}</h2>
-          <p className="text-xl text-yellow-700">{data.personalInfo.title}</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-8">
-          <div className="md:col-span-1">
-            <h3 className="text-lg font-semibold text-green-800 mb-3">Contact</h3>
-            <p className="text-sm text-gray-700">{data.personalInfo.email}</p>
+    <div className="bg-gray-100 p-8 font-sans">
+      <div className="max-w-5xl mx-auto bg-white shadow-lg grid grid-cols-1 md:grid-cols-3">
+        {/* LEFT PANEL */}
+        <div className="bg-pink-100 p-6 md:col-span-1">
+          <div className="mb-5"></div>
+
+          {/* Contact */}
+          <div className="mb-8">
+            <h3 className="text-md font-bold text-gray-800 mb-2 border-b pb-1">CONTACT</h3>
             <p className="text-sm text-gray-700">{data.personalInfo.phone}</p>
+            <p className="text-sm text-gray-700">{data.personalInfo.email}</p>
+            {data.personalInfo.linkedin && (
+              <p className="text-sm text-gray-700">{data.personalInfo.linkedin}</p>
+            )}
             <p className="text-sm text-gray-700">{data.personalInfo.location}</p>
-            {data.personalInfo.linkedin && <p className="text-sm text-gray-700">{data.personalInfo.linkedin}</p>}
-            <h3 className="text-lg font-semibold text-green-800 mt-4 mb-3">Skills</h3>
-            <ul className="list-disc list-inside text-sm text-gray-700">
-              {data.skills.map((skill: string, index: number) => (
+          </div>
+
+          {/* Education */}
+          <div className="mb-8">
+            <h3 className="text-md font-bold text-gray-800 mb-2 border-b pb-1">EDUCATION</h3>
+            {data.education.map((edu, index) => (
+              <div key={index} className="mb-4">
+                <p className="text-sm font-semibold text-gray-800">{edu.degree}</p>
+                <p className="text-sm text-gray-700">{edu.institution}</p>
+                <p className="text-sm text-gray-600">{edu.dates}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Skills */}
+          <div>
+            <h3 className="text-md font-bold text-gray-800 mb-2 border-b pb-1">PRO SKILLS</h3>
+            <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+              {data.skills.map((skill, index) => (
                 <li key={index}>{skill}</li>
               ))}
             </ul>
-            <h3 className="text-lg font-semibold text-green-800 mt-4 mb-3">Education</h3>
-            {data.education.map((edu: any, index: number) => (
-              <div key={index} className="mb-3">
-                <p className="font-medium text-gray-800">{edu.degree}</p>
-                <p className="text-sm text-gray-700">{edu.institution}</p>
-                <p className="text-sm text-gray-700">{edu.dates}</p>
-                <p className="text-sm text-gray-700">{edu.location}</p>
-              </div>
-            ))}
           </div>
-          <div className="md:col-span-2">
-            <h3 className="text-lg font-semibold text-green-800 mb-3">Summary</h3>
+        </div>
+
+        {/* RIGHT PANEL */}
+        <div className="p-6 md:col-span-2">
+          {/* Header */}
+          <div className="mb-6 border-b-2 pb-4">
+            <h1 className="text-3xl md:text-4xl font-light tracking-widest uppercase text-gray-800">
+              {data.personalInfo.name.split(' ')[0]}{" "}
+              <span className="font-bold">
+                {data.personalInfo.name.split(' ').slice(1).join(' ')}
+              </span>
+            </h1>
+            <p className="text-sm font-medium tracking-widest text-gray-700 uppercase">
+              {data.personalInfo.title}
+            </p>
+          </div>
+
+          {/* Summary */}
+          <div className="mb-6">
+            <h3 className="text-md font-bold text-gray-800 mb-2 border-b pb-1">PROFESSIONAL PROFILE</h3>
             <p className="text-sm text-gray-700">{data.summary}</p>
-            <h3 className="text-lg font-semibold text-green-800 mt-4 mb-3">Experience</h3>
-            {data.experience.map((exp: any, index: number) => (
+          </div>
+
+          {/* Experience */}
+          <div className="mb-6">
+            <h3 className="text-md font-bold text-gray-800 mb-2 border-b pb-1">EXPERIENCE</h3>
+            {data.experience.map((exp, index) => (
               <div key={index} className="mb-4">
-                <p className="font-medium text-gray-800">{exp.title}</p>
+                <div className="flex justify-between items-center text-sm font-semibold text-gray-800">
+                  <p>{exp.title}</p>
+                  <p className="text-xs font-normal text-gray-500">{exp.dates}</p>
+                </div>
                 <p className="text-sm text-yellow-700">{exp.company}</p>
-                <p className="text-sm text-gray-700">{exp.dates}</p>
-                <p className="text-sm text-gray-700">{exp.location}</p>
-                <p className="text-sm text-gray-700">{exp.description}</p>
+                <p className="text-sm text-gray-600">{exp.location}</p>
+                <ul className="list-disc list-inside text-sm text-gray-700 mt-1 space-y-1">
+                  {exp.description.split('\n').map((line, i) => (
+                    <li key={i}>{line}</li>
+                  ))}
+                </ul>
               </div>
             ))}
-            {data.projects && data.projects.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-green-800 mt-4 mb-3">Projects</h3>
-                {data.projects.map((project: any, index: number) => (
-                  <div key={index} className="mb-4">
-                    <p className="font-medium text-gray-800">{project.name}</p>
-                    <p className="text-sm text-yellow-700">{project.technologies}</p>
-                    <p className="text-sm text-gray-700">{project.description}</p>
-                    {project.link && (
-                      <a href={project.link} className="text-sm text-blue-500">
-                        {project.link}
-                      </a>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-            {data.publications && data.publications.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-green-800 mt-4 mb-3">Publications</h3>
-                {data.publications.map((pub: any, index: number) => (
-                  <div key={index} className="mb-4">
-                    <p className="font-medium text-gray-800">{pub.title}</p>
-                    <p className="text-sm text-gray-700">Authors: {pub.authors}</p>
-                    <p className="text-sm text-gray-700">Journal: {pub.journal}</p>
-                    <p className="text-sm text-gray-700">Year: {pub.year}</p>
-                    {pub.links && pub.links.length > 0 && (
-                      <div>
-                        <p className="text-sm font-medium text-green-700">Links:</p>
-                        {pub.links.map((link: any, linkIndex: number) => (
-                          <a
-                            key={linkIndex}
-                            href={link.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
-                          >
-                            {link.type}
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
+
+          {/* Projects */}
+          {data.projects && data.projects.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-md font-bold text-gray-800 mb-2 border-b pb-1">PROJECTS</h3>
+              {data.projects.map((project, index) => (
+                <div key={index} className="mb-3">
+                  <p className="font-medium text-gray-800">{project.name}</p>
+                  <p className="text-sm text-yellow-700">{project.technologies}</p>
+                  <p className="text-sm text-gray-700">{project.description}</p>
+                  {project.link && (
+                    <a href={project.link} className="text-sm text-blue-600 underline">
+                      {project.link}
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Publications */}
+          {data.publications && data.publications.length > 0 && (
+            <div>
+              <h3 className="text-md font-bold text-gray-800 mb-2 border-b pb-1">PUBLICATIONS</h3>
+              {data.publications.map((pub, index) => (
+                <div key={index} className="mb-3">
+                  <p className="font-medium text-gray-800">{pub.title}</p>
+                  <p className="text-sm text-gray-700">Authors: {pub.authors}</p>
+                  <p className="text-sm text-gray-700">Journal: {pub.journal}</p>
+                  <p className="text-sm text-gray-700">Year: {pub.year}</p>
+                  {pub.links?.length > 0 && (
+                    <div className="mt-1 space-x-2">
+                      {pub.links.map((link, linkIndex) => (
+                        <a
+                          key={linkIndex}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs bg-gray-700 text-white px-2 py-1 rounded hover:bg-gray-900"
+                        >
+                          {link.type}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // C3: Digital Creative - Modern and tech-focused
@@ -1732,373 +1874,703 @@ function ExecutiveLeadershipTemplate({ data }: { data: ResumeData }) {
 }
 
 // E2: C-Suite - Sophisticated and elegant
+// function ExecutiveCSuiteTemplate({ data }: { data: ResumeData }) {
+//   return (
+//     <div className="p-8 bg-indigo-900 text-white">
+//       <div className="border-b pb-4 mb-6">
+//         <h2 className="text-3xl font-bold">{data.personalInfo.name}</h2>
+//         <p className="text-xl text-gray-400">{data.personalInfo.title}</p>
+//       </div>
+//       <div className="grid grid-cols-1 gap-8">
+//         <div>
+//           <h3 className="text-lg font-semibold mb-3">Contact</h3>
+//           <p className="text-sm mb-1">{data.personalInfo.email}</p>
+//           <p className="text-sm mb-1">{data.personalInfo.phone}</p>
+//           <p className="text-sm mb-1">{data.personalInfo.location}</p>
+//           {data.personalInfo.linkedin && <p className="text-sm">{data.personalInfo.linkedin}</p>}
+//         </div>
+//         <div>
+//           <h3 className="text-lg font-semibold mb-3">Skills</h3>
+//           <ul className="list-disc list-inside text-sm space-y-1">
+//             {data.skills.map((skill: string, index: number) => (
+//               <li key={index}>{skill}</li>
+//             ))}
+//           </ul>
+//         </div>
+//         <div>
+//           <h3 className="text-lg font-semibold mb-3">Experience</h3>
+//           {data.experience.map((exp: any, index: number) => (
+//             <div key={index} className="mb-4">
+//               <p className="font-medium">{exp.title}</p>
+//               <p className="text-sm text-gray-400">{exp.company}</p>
+//               <p className="text-sm text-gray-500">{exp.location}</p>
+//               <p className="text-sm mt-2">{exp.description}</p>
+//             </div>
+//           ))}
+//         </div>
+//         {data.projects && data.projects.length > 0 && (
+//           <div>
+//             <h3 className="text-lg font-semibold mb-3">Projects</h3>
+//             {data.projects.map((project: any, index: number) => (
+//               <div key={index} className="mb-4">
+//                 <p className="font-medium">{project.name}</p>
+//                 <p className="text-sm text-gray-400">{project.technologies}</p>
+//                 <p className="text-sm text-gray-500">{project.link}</p>
+//                 <p className="text-sm mt-2">{project.description}</p>
+//               </div>
+//             ))}
+//           </div>
+//         )}
+//         {data.publications && data.publications.length > 0 && (
+//           <div>
+//             <h3 className="text-lg font-semibold mb-3">Publications</h3>
+//             {data.publications.map((pub: any, index: number) => (
+//               <div key={index} className="mb-4">
+//                 <p className="font-medium">{pub.title}</p>
+//                 <p className="text-sm text-gray-700">Authors: {pub.authors}</p>
+//                 <p className="text-sm text-gray-700">Journal: {pub.journal}</p>
+//                 <p className="text-sm text-gray-700">Year: {pub.year}</p>
+//                 {pub.links && pub.links.length > 0 && (
+//                   <div>
+//                     <p className="text-sm font-medium">Links:</p>
+//                     {pub.links.map((link: any, linkIndex: number) => (
+//                       <a
+//                         key={linkIndex}
+//                         href={link.url}
+//                         target="_blank"
+//                         rel="noopener noreferrer"
+//                         className="text-xs bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700"
+//                       >
+//                         {link.type}
+//                       </a>
+//                     ))}
+//                   </div>
+//                 )}
+//               </div>
+//             ))}
+//           </div>
+//         )}
+//         <div>
+//           <h3 className="text-lg font-semibold mb-3">Education</h3>
+//           {data.education.map((edu: any, index: number) => (
+//             <div key={index} className="mb-3">
+//               <p className="font-medium">{edu.degree}</p>
+//               <p className="text-sm">{edu.institution}</p>
+//               <p className="text-sm text-gray-600">{edu.dates}</p>
+//               <p className="text-sm">{edu.location}</p>
+//             </div>
+//           ))}
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
 function ExecutiveCSuiteTemplate({ data }: { data: ResumeData }) {
   return (
-    <div className="p-8 bg-indigo-900 text-white">
-      <div className="border-b pb-4 mb-6">
-        <h2 className="text-3xl font-bold">{data.personalInfo.name}</h2>
-        <p className="text-xl text-gray-400">{data.personalInfo.title}</p>
+    <div className="min-h-screen flex font-sans text-gray-900">
+      {/* Left Sidebar */}
+      <div className="w-1/3 bg-gray-800 text-white p-8">
+        <h2 className="text-3xl font-bold leading-tight">{data.personalInfo.name}</h2>
+        <p className="text-lg mt-1">{data.personalInfo.title}</p>
+
+        <div className="mt-8 space-y-2 text-sm">
+          <p>{data.personalInfo.phone}</p>
+          <p>{data.personalInfo.email}</p>
+          {/* {data.personalInfo.website && <p>{data.personalInfo.website}</p>} */}
+        </div>
       </div>
-      <div className="grid grid-cols-1 gap-8">
+
+      {/* Right Content */}
+      <div className="w-2/3 p-10 space-y-10">
+        {/* Experience */}
         <div>
-          <h3 className="text-lg font-semibold mb-3">Contact</h3>
-          <p className="text-sm mb-1">{data.personalInfo.email}</p>
-          <p className="text-sm mb-1">{data.personalInfo.phone}</p>
-          <p className="text-sm mb-1">{data.personalInfo.location}</p>
-          {data.personalInfo.linkedin && <p className="text-sm">{data.personalInfo.linkedin}</p>}
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold mb-3">Skills</h3>
-          <ul className="list-disc list-inside text-sm space-y-1">
-            {data.skills.map((skill: string, index: number) => (
-              <li key={index}>{skill}</li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold mb-3">Experience</h3>
+          <h3 className="text-xl font-bold mb-4">EXPERIENCE</h3>
           {data.experience.map((exp: any, index: number) => (
-            <div key={index} className="mb-4">
-              <p className="font-medium">{exp.title}</p>
-              <p className="text-sm text-gray-400">{exp.company}</p>
-              <p className="text-sm text-gray-500">{exp.location}</p>
-              <p className="text-sm mt-2">{exp.description}</p>
+            <div key={index} className="mb-6">
+              <p className="font-semibold">{exp.title}</p>
+              <p className="text-sm font-medium text-gray-700">{exp.company} {exp.dates && `| ${exp.dates}`}</p>
+              <ul className="list-disc list-inside mt-2 text-sm text-gray-800 space-y-1">
+                {exp.description.split("•").filter(Boolean).map((line: string, i: number) => (
+                  <li key={i}>{line.trim()}</li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>
-        {data.projects && data.projects.length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Projects</h3>
-            {data.projects.map((project: any, index: number) => (
-              <div key={index} className="mb-4">
-                <p className="font-medium">{project.name}</p>
-                <p className="text-sm text-gray-400">{project.technologies}</p>
-                <p className="text-sm text-gray-500">{project.link}</p>
-                <p className="text-sm mt-2">{project.description}</p>
-              </div>
-            ))}
-          </div>
-        )}
-        {data.publications && data.publications.length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Publications</h3>
-            {data.publications.map((pub: any, index: number) => (
-              <div key={index} className="mb-4">
-                <p className="font-medium">{pub.title}</p>
-                <p className="text-sm text-gray-700">Authors: {pub.authors}</p>
-                <p className="text-sm text-gray-700">Journal: {pub.journal}</p>
-                <p className="text-sm text-gray-700">Year: {pub.year}</p>
-                {pub.links && pub.links.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium">Links:</p>
-                    {pub.links.map((link: any, linkIndex: number) => (
-                      <a
-                        key={linkIndex}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700"
-                      >
-                        {link.type}
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+
+        {/* Education */}
         <div>
-          <h3 className="text-lg font-semibold mb-3">Education</h3>
+          <h3 className="text-xl font-bold mb-4">EDUCATION</h3>
           {data.education.map((edu: any, index: number) => (
             <div key={index} className="mb-3">
-              <p className="font-medium">{edu.degree}</p>
-              <p className="text-sm">{edu.institution}</p>
-              <p className="text-sm text-gray-600">{edu.dates}</p>
-              <p className="text-sm">{edu.location}</p>
+              <p className="font-semibold">{edu.institution}</p>
+              <p className="text-sm">{edu.degree}</p>
+              <p className="text-sm text-gray-500">{edu.dates}</p>
             </div>
           ))}
+        </div>
+
+        {/* Skills */}
+        <div>
+          <h3 className="text-xl font-bold mb-4">SKILLS</h3>
+          <div className="grid grid-cols-3 gap-x-4 gap-y-1 text-sm text-gray-900">
+            {data.skills.map((skill: string, index: number) => (
+              <p key={index}>{skill}</p>
+            ))}
+          </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
+
 
 // E3: Director - Focused on leadership and achievements
+// function ExecutiveDirectorTemplate({ data }: { data: ResumeData }) {
+//   return (
+//     <div className="p-8 bg-teal-900 text-white">
+//       <div className="border-b pb-4 mb-6">
+//         <h2 className="text-3xl font-bold">{data.personalInfo.name}</h2>
+//         <p className="text-xl text-gray-400">{data.personalInfo.title}</p>
+//       </div>
+//       <div className="grid grid-cols-1 gap-8">
+//         <div>
+//           <h3 className="text-lg font-semibold mb-3">Contact</h3>
+//           <p className="text-sm mb-1">{data.personalInfo.email}</p>
+//           <p className="text-sm mb-1">{data.personalInfo.phone}</p>
+//           <p className="text-sm mb-1">{data.personalInfo.location}</p>
+//           {data.personalInfo.linkedin && <p className="text-sm">{data.personalInfo.linkedin}</p>}
+//         </div>
+//         <div>
+//           <h3 className="text-lg font-semibold mb-3">Skills</h3>
+//           <ul className="list-disc list-inside text-sm space-y-1">
+//             {data.skills.map((skill: string, index: number) => (
+//               <li key={index}>{skill}</li>
+//             ))}
+//           </ul>
+//         </div>
+//         <div>
+//           <h3 className="text-lg font-semibold mb-3">Experience</h3>
+//           {data.experience.map((exp: any, index: number) => (
+//             <div key={index} className="mb-4">
+//               <p className="font-medium">{exp.title}</p>
+//               <p className="text-sm text-gray-400">{exp.company}</p>
+//               <p className="text-sm text-gray-500">{exp.location}</p>
+//               <p className="text-sm mt-2">{exp.description}</p>
+//             </div>
+//           ))}
+//         </div>
+//         {data.projects && data.projects.length > 0 && (
+//           <div>
+//             <h3 className="text-lg font-semibold mb-3">Projects</h3>
+//             {data.projects.map((project: any, index: number) => (
+//               <div key={index} className="mb-4">
+//                 <p className="font-medium">{project.name}</p>
+//                 <p className="text-sm text-gray-400">{project.technologies}</p>
+//                 <p className="text-sm text-gray-500">{project.link}</p>
+//                 <p className="text-sm mt-2">{project.description}</p>
+//               </div>
+//             ))}
+//           </div>
+//         )}
+//         {data.publications && data.publications.length > 0 && (
+//           <div>
+//             <h3 className="text-lg font-semibold mb-3">Publications</h3>
+//             {data.publications.map((pub: any, index: number) => (
+//               <div key={index} className="mb-4">
+//                 <p className="font-medium">{pub.title}</p>
+//                 <p className="text-sm text-gray-700">Authors: {pub.authors}</p>
+//                 <p className="text-sm text-gray-700">Journal: {pub.journal}</p>
+//                 <p className="text-sm text-gray-700">Year: {pub.year}</p>
+//                 {pub.links && pub.links.length > 0 && (
+//                   <div>
+//                     <p className="text-sm font-medium">Links:</p>
+//                     {pub.links.map((link: any, linkIndex: number) => (
+//                       <a
+//                         key={linkIndex}
+//                         href={link.url}
+//                         target="_blank"
+//                         rel="noopener noreferrer"
+//                         className="text-xs bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700"
+//                       >
+//                         {link.type}
+//                       </a>
+//                     ))}
+//                   </div>
+//                 )}
+//               </div>
+//             ))}
+//           </div>
+//         )}
+//         <div>
+//           <h3 className="text-lg font-semibold mb-3">Education</h3>
+//           {data.education.map((edu: any, index: number) => (
+//             <div key={index} className="mb-3">
+//               <p className="font-medium">{edu.degree}</p>
+//               <p className="text-sm">{edu.institution}</p>
+//               <p className="text-sm text-gray-600">{edu.dates}</p>
+//               <p className="text-sm">{edu.location}</p>
+//             </div>
+//           ))}
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
+
 function ExecutiveDirectorTemplate({ data }: { data: ResumeData }) {
   return (
-    <div className="p-8 bg-teal-900 text-white">
-      <div className="border-b pb-4 mb-6">
-        <h2 className="text-3xl font-bold">{data.personalInfo.name}</h2>
-        <p className="text-xl text-gray-400">{data.personalInfo.title}</p>
-      </div>
-      <div className="grid grid-cols-1 gap-8">
+    <div className="bg-white text-gray-900 p-10 font-sans max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="flex justify-between items-start border-b pb-4 mb-8">
         <div>
-          <h3 className="text-lg font-semibold mb-3">Contact</h3>
-          <p className="text-sm mb-1">{data.personalInfo.email}</p>
-          <p className="text-sm mb-1">{data.personalInfo.phone}</p>
-          <p className="text-sm mb-1">{data.personalInfo.location}</p>
-          {data.personalInfo.linkedin && <p className="text-sm">{data.personalInfo.linkedin}</p>}
+          <h1 className="text-4xl font-light">{data.personalInfo.name}</h1>
+          <p className="uppercase tracking-wide text-sm text-gray-600">{data.personalInfo.title}</p>
         </div>
+        <div className="text-sm space-y-1 text-right">
+          <p><span className="font-bold uppercase">Phone</span><br />{data.personalInfo.phone}</p>
+          <p><span className="font-bold uppercase">Email</span><br />{data.personalInfo.email}</p>
+          <p><span className="font-bold uppercase">Location</span><br />{data.personalInfo.location}</p>
+        </div>
+      </div>
+
+      {/* Experience */}
+      <div className="mb-10">
+        <h2 className="uppercase text-gray-700 tracking-wide text-sm mb-4">Experience</h2>
+        {data.experience.map((exp, index) => (
+          <div key={index} className="mb-6">
+            <p className="font-bold">{exp.company}</p>
+            <p className="text-sm italic">{exp.title}</p>
+            <p className="text-sm text-gray-600 mb-2">{exp.dates}</p>
+            <p className="text-sm text-gray-800 whitespace-pre-line">{exp.description}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Education & Skills */}
+      <div className="grid grid-cols-2 gap-10">
         <div>
-          <h3 className="text-lg font-semibold mb-3">Skills</h3>
-          <ul className="list-disc list-inside text-sm space-y-1">
-            {data.skills.map((skill: string, index: number) => (
+          <h2 className="uppercase text-gray-700 tracking-wide text-sm mb-4">Education</h2>
+          {data.education.map((edu, index) => (
+            <div key={index}>
+              <p className="font-bold">{edu.institution}</p>
+              <p className="text-sm">{edu.degree}</p>
+              <p className="text-sm text-gray-600">{edu.dates}</p>
+            </div>
+          ))}
+        </div>
+
+        <div>
+          <h2 className="uppercase text-gray-700 tracking-wide text-sm mb-4">Skills</h2>
+          <ul className="text-sm list-none space-y-1">
+            {data.skills.map((skill, index) => (
               <li key={index}>{skill}</li>
             ))}
           </ul>
         </div>
-        <div>
-          <h3 className="text-lg font-semibold mb-3">Experience</h3>
-          {data.experience.map((exp: any, index: number) => (
-            <div key={index} className="mb-4">
-              <p className="font-medium">{exp.title}</p>
-              <p className="text-sm text-gray-400">{exp.company}</p>
-              <p className="text-sm text-gray-500">{exp.location}</p>
-              <p className="text-sm mt-2">{exp.description}</p>
-            </div>
-          ))}
-        </div>
-        {data.projects && data.projects.length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Projects</h3>
-            {data.projects.map((project: any, index: number) => (
-              <div key={index} className="mb-4">
-                <p className="font-medium">{project.name}</p>
-                <p className="text-sm text-gray-400">{project.technologies}</p>
-                <p className="text-sm text-gray-500">{project.link}</p>
-                <p className="text-sm mt-2">{project.description}</p>
-              </div>
-            ))}
-          </div>
-        )}
-        {data.publications && data.publications.length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Publications</h3>
-            {data.publications.map((pub: any, index: number) => (
-              <div key={index} className="mb-4">
-                <p className="font-medium">{pub.title}</p>
-                <p className="text-sm text-gray-700">Authors: {pub.authors}</p>
-                <p className="text-sm text-gray-700">Journal: {pub.journal}</p>
-                <p className="text-sm text-gray-700">Year: {pub.year}</p>
-                {pub.links && pub.links.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium">Links:</p>
-                    {pub.links.map((link: any, linkIndex: number) => (
-                      <a
-                        key={linkIndex}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700"
-                      >
-                        {link.type}
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-        <div>
-          <h3 className="text-lg font-semibold mb-3">Education</h3>
-          {data.education.map((edu: any, index: number) => (
-            <div key={index} className="mb-3">
-              <p className="font-medium">{edu.degree}</p>
-              <p className="text-sm">{edu.institution}</p>
-              <p className="text-sm text-gray-600">{edu.dates}</p>
-              <p className="text-sm">{edu.location}</p>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
-  )
+  );
 }
+
 
 // E4: Board Member - Emphasizes experience and qualifications
+// function ExecutiveBoardMemberTemplate({ data }: { data: ResumeData }) {
+//   return (
+//     <div className="p-8 bg-blue-900 text-white">
+//       <div className="border-b pb-4 mb-6">
+//         <h2 className="text-3xl font-bold">{data.personalInfo.name}</h2>
+//         <p className="text-xl text-gray-400">{data.personalInfo.title}</p>
+//       </div>
+//       <div className="grid grid-cols-1 gap-8">
+//         <div>
+//           <h3 className="text-lg font-semibold mb-3">Contact</h3>
+//           <p className="text-sm mb-1">{data.personalInfo.email}</p>
+//           <p className="text-sm mb-1">{data.personalInfo.phone}</p>
+//           <p className="text-sm mb-1">{data.personalInfo.location}</p>
+//           {data.personalInfo.linkedin && <p className="text-sm">{data.personalInfo.linkedin}</p>}
+//         </div>
+//         <div>
+//           <h3 className="text-lg font-semibold mb-3">Skills</h3>
+//           <ul className="list-disc list-inside text-sm space-y-1">
+//             {data.skills.map((skill: string, index: number) => (
+//               <li key={index}>{skill}</li>
+//             ))}
+//           </ul>
+//         </div>
+//         <div>
+//           <h3 className="text-lg font-semibold mb-3">Experience</h3>
+//           {data.experience.map((exp: any, index: number) => (
+//             <div key={index} className="mb-4">
+//               <p className="font-medium">{exp.title}</p>
+//               <p className="text-sm text-gray-400">{exp.company}</p>
+//               <p className="text-sm text-gray-500">{exp.location}</p>
+//               <p className="text-sm mt-2">{exp.description}</p>
+//             </div>
+//           ))}
+//         </div>
+//         {data.projects && data.projects.length > 0 && (
+//           <div>
+//             <h3 className="text-lg font-semibold mb-3">Projects</h3>
+//             {data.projects.map((project: any, index: number) => (
+//               <div key={index} className="mb-4">
+//                 <p className="font-medium">{project.name}</p>
+//                 <p className="text-sm text-gray-400">{project.technologies}</p>
+//                 <p className="text-sm text-gray-500">{project.link}</p>
+//                 <p className="text-sm mt-2">{project.description}</p>
+//               </div>
+//             ))}
+//           </div>
+//         )}
+//         {data.publications && data.publications.length > 0 && (
+//           <div>
+//             <h3 className="text-lg font-semibold mb-3">Publications</h3>
+//             {data.publications.map((pub: any, index: number) => (
+//               <div key={index} className="mb-4">
+//                 <p className="font-medium">{pub.title}</p>
+//                 <p className="text-sm text-gray-700">Authors: {pub.authors}</p>
+//                 <p className="text-sm text-gray-700">Journal: {pub.journal}</p>
+//                 <p className="text-sm text-gray-700">Year: {pub.year}</p>
+//                 {pub.links && pub.links.length > 0 && (
+//                   <div>
+//                     <p className="text-sm font-medium">Links:</p>
+//                     {pub.links.map((link: any, linkIndex: number) => (
+//                       <a
+//                         key={linkIndex}
+//                         href={link.url}
+//                         target="_blank"
+//                         rel="noopener noreferrer"
+//                         className="text-xs bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700"
+//                       >
+//                         {link.type}
+//                       </a>
+//                     ))}
+//                   </div>
+//                 )}
+//               </div>
+//             ))}
+//           </div>
+//         )}
+//         <div>
+//           <h3 className="text-lg font-semibold mb-3">Education</h3>
+//           {data.education.map((edu: any, index: number) => (
+//             <div key={index} className="mb-3">
+//               <p className="font-medium">{edu.degree}</p>
+//               <p className="text-sm">{edu.institution}</p>
+//               <p className="text-sm text-gray-600">{edu.dates}</p>
+//               <p className="text-sm">{edu.location}</p>
+//             </div>
+//           ))}
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
+
+
 function ExecutiveBoardMemberTemplate({ data }: { data: ResumeData }) {
   return (
-    <div className="p-8 bg-blue-900 text-white">
-      <div className="border-b pb-4 mb-6">
-        <h2 className="text-3xl font-bold">{data.personalInfo.name}</h2>
-        <p className="text-xl text-gray-400">{data.personalInfo.title}</p>
+    <div className="flex font-sans min-h-screen">
+      {/* Left Sidebar */}
+      <div className="w-1/3 bg-blue-900 text-white p-6 space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">{data.personalInfo.name}</h1>
+        </div>
+
+        <div>
+          <h2 className="text-sm font-bold uppercase bg-blue-800 px-2 py-1 rounded">Details</h2>
+          <p className="text-sm mt-2">{data.personalInfo.address}</p>
+          <p className="text-sm">{data.personalInfo.phone}</p>
+          <p className="text-sm">{data.personalInfo.email}</p>
+        </div>
+
+        {data.personalInfo.summary && (
+          <div>
+            <h2 className="text-sm font-bold uppercase bg-blue-800 px-2 py-1 rounded">Career</h2>
+            <p className="text-sm mt-2 whitespace-pre-line">{data.personalInfo.summary}</p>
+          </div>
+        )}
+
+        {data.skills.length > 0 && (
+          <div>
+            <h2 className="text-sm font-bold uppercase bg-blue-800 px-2 py-1 rounded">Software</h2>
+            <ul className="text-sm mt-2 list-disc list-inside space-y-1">
+              {data.skills.map((skill, i) => (
+                <li key={i}>{skill}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {data.personalInfo.languages && (
+          <div>
+            <h2 className="text-sm font-bold uppercase bg-blue-800 px-2 py-1 rounded">Informations</h2>
+            <p className="text-sm mt-2">{data.personalInfo.languages}</p>
+          </div>
+        )}
+
+        {data.personalInfo.hobbies && (
+          <div>
+            <h2 className="text-sm font-bold uppercase bg-blue-800 px-2 py-1 rounded">Hobbies</h2>
+            <p className="text-sm mt-2">{data.personalInfo.hobbies}</p>
+          </div>
+        )}
       </div>
-      <div className="grid grid-cols-1 gap-8">
-        <div>
-          <h3 className="text-lg font-semibold mb-3">Contact</h3>
-          <p className="text-sm mb-1">{data.personalInfo.email}</p>
-          <p className="text-sm mb-1">{data.personalInfo.phone}</p>
-          <p className="text-sm mb-1">{data.personalInfo.location}</p>
-          {data.personalInfo.linkedin && <p className="text-sm">{data.personalInfo.linkedin}</p>}
+
+      {/* Right Content Area */}
+      <div className="w-2/3 bg-white p-8 space-y-8">
+        <div className="bg-blue-900 text-white text-lg font-semibold px-4 py-2 rounded-full w-fit mb-4">
+          Professional Experience
         </div>
-        <div>
-          <h3 className="text-lg font-semibold mb-3">Skills</h3>
-          <ul className="list-disc list-inside text-sm space-y-1">
-            {data.skills.map((skill: string, index: number) => (
-              <li key={index}>{skill}</li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold mb-3">Experience</h3>
-          {data.experience.map((exp: any, index: number) => (
-            <div key={index} className="mb-4">
-              <p className="font-medium">{exp.title}</p>
-              <p className="text-sm text-gray-400">{exp.company}</p>
-              <p className="text-sm text-gray-500">{exp.location}</p>
-              <p className="text-sm mt-2">{exp.description}</p>
+
+        {data.experience.map((exp, index) => (
+          <div key={index} className="mb-6">
+            <div className="flex justify-between">
+              <div>
+                <p className="font-bold text-sm">{exp.title}</p>
+                <p className="font-semibold text-sm text-gray-800">{exp.company}</p>
+              </div>
+              <p className="text-sm text-gray-600">{exp.dates}</p>
             </div>
-          ))}
+            <ul className="list-disc list-inside mt-2 text-sm text-gray-700 space-y-1">
+              {exp.description.split('\n').map((point, i) => (
+                <li key={i}>{point}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+
+        <div className="bg-blue-900 text-white text-lg font-semibold px-4 py-2 rounded-full w-fit mt-10 mb-4">
+          Education
         </div>
-        {data.projects && data.projects.length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Projects</h3>
-            {data.projects.map((project: any, index: number) => (
-              <div key={index} className="mb-4">
-                <p className="font-medium">{project.name}</p>
-                <p className="text-sm text-gray-400">{project.technologies}</p>
-                <p className="text-sm text-gray-500">{project.link}</p>
-                <p className="text-sm mt-2">{project.description}</p>
-              </div>
-            ))}
-          </div>
-        )}
-        {data.publications && data.publications.length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Publications</h3>
-            {data.publications.map((pub: any, index: number) => (
-              <div key={index} className="mb-4">
-                <p className="font-medium">{pub.title}</p>
-                <p className="text-sm text-gray-700">Authors: {pub.authors}</p>
-                <p className="text-sm text-gray-700">Journal: {pub.journal}</p>
-                <p className="text-sm text-gray-700">Year: {pub.year}</p>
-                {pub.links && pub.links.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium">Links:</p>
-                    {pub.links.map((link: any, linkIndex: number) => (
-                      <a
-                        key={linkIndex}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700"
-                      >
-                        {link.type}
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-        <div>
-          <h3 className="text-lg font-semibold mb-3">Education</h3>
-          {data.education.map((edu: any, index: number) => (
-            <div key={index} className="mb-3">
-              <p className="font-medium">{edu.degree}</p>
-              <p className="text-sm">{edu.institution}</p>
+
+        {data.education.map((edu, index) => (
+          <div key={index} className="mb-4">
+            <div className="flex justify-between">
+              <p className="font-bold uppercase text-sm">{edu.degree}</p>
               <p className="text-sm text-gray-600">{edu.dates}</p>
-              <p className="text-sm">{edu.location}</p>
             </div>
-          ))}
-        </div>
+            <p className="text-sm italic text-gray-700">{edu.institution}</p>
+            {edu.location && <p className="text-sm text-gray-700">{edu.location}</p>}
+          </div>
+        ))}
       </div>
     </div>
-  )
+  );
 }
 
+
 // E5: Executive Elite - Premium design with a focus on achievements
+// function ExecutiveEliteTemplate({ data }: { data: ResumeData }) {
+//   return (
+//     <div className="p-8 bg-black text-white">
+//       <div className="border-b pb-4 mb-6">
+//         <h2 className="text-3xl font-bold">{data.personalInfo.name}</h2>
+//         <p className="text-xl text-gray-400">{data.personalInfo.title}</p>
+//       </div>
+//       <div className="grid grid-cols-1 gap-8">
+//         <div>
+//           <h3 className="text-lg font-semibold mb-3">Contact</h3>
+//           <p className="text-sm mb-1">{data.personalInfo.email}</p>
+//           <p className="text-sm mb-1">{data.personalInfo.phone}</p>
+//           <p className="text-sm mb-1">{data.personalInfo.location}</p>
+//           {data.personalInfo.linkedin && <p className="text-sm">{data.personalInfo.linkedin}</p>}
+//         </div>
+//         <div>
+//           <h3 className="text-lg font-semibold mb-3">Skills</h3>
+//           <ul className="list-disc list-inside text-sm space-y-1">
+//             {data.skills.map((skill: string, index: number) => (
+//               <li key={index}>{skill}</li>
+//             ))}
+//           </ul>
+//         </div>
+//         <div>
+//           <h3 className="text-lg font-semibold mb-3">Experience</h3>
+//           {data.experience.map((exp: any, index: number) => (
+//             <div key={index} className="mb-4">
+//               <p className="font-medium">{exp.title}</p>
+//               <p className="text-sm text-gray-400">{exp.company}</p>
+//               <p className="text-sm text-gray-500">{exp.location}</p>
+//               <p className="text-sm mt-2">{exp.description}</p>
+//             </div>
+//           ))}
+//         </div>
+//         {data.projects && data.projects.length > 0 && (
+//           <div>
+//             <h3 className="text-lg font-semibold mb-3">Projects</h3>
+//             {data.projects.map((project: any, index: number) => (
+//               <div key={index} className="mb-4">
+//                 <p className="font-medium">{project.name}</p>
+//                 <p className="text-sm text-gray-400">{project.technologies}</p>
+//                 <p className="text-sm text-gray-500">{project.link}</p>
+//                 <p className="text-sm mt-2">{project.description}</p>
+//               </div>
+//             ))}
+//           </div>
+//         )}
+//         {data.publications && data.publications.length > 0 && (
+//           <div>
+//             <h3 className="text-lg font-semibold mb-3">Publications</h3>
+//             {data.publications.map((pub: any, index: number) => (
+//               <div key={index} className="mb-4">
+//                 <p className="font-medium">{pub.title}</p>
+//                 <p className="text-sm text-gray-700">Authors: {pub.authors}</p>
+//                 <p className="text-sm text-gray-700">Journal: {pub.journal}</p>
+//                 <p className="text-sm text-gray-700">Year: {pub.year}</p>
+//                 {pub.links && pub.links.length > 0 && (
+//                   <div>
+//                     <p className="text-sm font-medium">Links:</p>
+//                     {pub.links.map((link: any, linkIndex: number) => (
+//                       <a
+//                         key={linkIndex}
+//                         href={link.url}
+//                         target="_blank"
+//                         rel="noopener noreferrer"
+//                         className="text-xs bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700"
+//                       >
+//                         {link.type}
+//                       </a>
+//                     ))}
+//                   </div>
+//                 )}
+//               </div>
+//             ))}
+//           </div>
+//         )}
+//         <div>
+//           <h3 className="text-lg font-semibold mb-3">Education</h3>
+//           {data.education.map((edu: any, index: number) => (
+//             <div key={index} className="mb-3">
+//               <p className="font-medium">{edu.degree}</p>
+//               <p className="text-sm">{edu.institution}</p>
+//               <p className="text-sm text-gray-600">{edu.dates}</p>
+//               <p className="text-sm">{edu.location}</p>
+//             </div>
+//           ))}
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
+
+
 function ExecutiveEliteTemplate({ data }: { data: ResumeData }) {
   return (
-    <div className="p-8 bg-black text-white">
-      <div className="border-b pb-4 mb-6">
-        <h2 className="text-3xl font-bold">{data.personalInfo.name}</h2>
-        <p className="text-xl text-gray-400">{data.personalInfo.title}</p>
+    <div className="bg-white text-black p-10 font-serif max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="text-center border-b pb-4 mb-6">
+        <h1 className="text-4xl font-light">
+          {data.personalInfo.name.split(' ')[0]}{' '}
+          <span className="font-bold">
+            {data.personalInfo.name.split(' ').slice(1).join(' ')}
+          </span>
+        </h1>
+        <p className="text-sm mt-2">
+          {data.personalInfo.location} • {data.personalInfo.phone}
+        </p>
+        <p className="text-sm text-green-700 font-medium">
+          {data.personalInfo.email}
+          {data.personalInfo.linkedin && ` • ${data.personalInfo.linkedin}`}
+        </p>
       </div>
-      <div className="grid grid-cols-1 gap-8">
-        <div>
-          <h3 className="text-lg font-semibold mb-3">Contact</h3>
-          <p className="text-sm mb-1">{data.personalInfo.email}</p>
-          <p className="text-sm mb-1">{data.personalInfo.phone}</p>
-          <p className="text-sm mb-1">{data.personalInfo.location}</p>
-          {data.personalInfo.linkedin && <p className="text-sm">{data.personalInfo.linkedin}</p>}
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold mb-3">Skills</h3>
-          <ul className="list-disc list-inside text-sm space-y-1">
-            {data.skills.map((skill: string, index: number) => (
-              <li key={index}>{skill}</li>
+
+      {/* Summary */}
+      {data.personalInfo.summary && (
+        <p className="text-sm mb-8">{data.personalInfo.summary}</p>
+      )}
+
+      {/* Section: Experience */}
+      <section className="mb-8">
+        <h2 className="text-lg font-extrabold uppercase mb-2">Experience</h2>
+        {data.experience.map((exp, index) => (
+          <div key={index} className="mb-4">
+            <p className="text-xs italic text-gray-600">{exp.dates}</p>
+            <p className="text-sm font-bold">
+              {exp.title}
+              <span className="font-normal text-gray-700">, {exp.company}</span>
+            </p>
+            <ul className="list-disc list-inside text-sm text-gray-800 mt-1 space-y-1">
+              {exp.description.split('\n').map((point, i) => (
+                <li key={i}>{point}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </section>
+
+      {/* Section: Education */}
+      <section className="mb-8">
+        <h2 className="text-lg font-extrabold uppercase mb-2">Education</h2>
+        {data.education.map((edu, index) => (
+          <div key={index} className="mb-3">
+            <p className="text-xs italic text-gray-600">{edu.dates}</p>
+            <p className="text-sm font-bold text-green-800">
+              {edu.degree}
+              <span className="font-normal text-black">, {edu.institution}</span>
+            </p>
+            <p className="text-sm text-gray-700">{edu.location}</p>
+          </div>
+        ))}
+      </section>
+
+      {/* Section: Skills */}
+      {data.skills.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-lg font-extrabold uppercase mb-2">Skills</h2>
+          <ul className="text-sm text-gray-800 grid grid-cols-2 list-disc list-inside gap-y-1">
+            {data.skills.map((skill, i) => (
+              <li key={i}>{skill}</li>
             ))}
           </ul>
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold mb-3">Experience</h3>
-          {data.experience.map((exp: any, index: number) => (
-            <div key={index} className="mb-4">
-              <p className="font-medium">{exp.title}</p>
-              <p className="text-sm text-gray-400">{exp.company}</p>
-              <p className="text-sm text-gray-500">{exp.location}</p>
-              <p className="text-sm mt-2">{exp.description}</p>
+        </section>
+      )}
+
+      
+
+      {/* Optional: Projects */}
+      {data.projects && data.projects.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-lg font-extrabold uppercase mb-2">Projects</h2>
+          {data.projects.map((project, i) => (
+            <div key={i} className="mb-3">
+              <p className="text-sm font-bold">{project.name}</p>
+              <p className="text-xs text-gray-600">{project.technologies}</p>
+              <p className="text-xs text-blue-700">{project.link}</p>
+              <p className="text-sm">{project.description}</p>
             </div>
           ))}
-        </div>
-        {data.projects && data.projects.length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Projects</h3>
-            {data.projects.map((project: any, index: number) => (
-              <div key={index} className="mb-4">
-                <p className="font-medium">{project.name}</p>
-                <p className="text-sm text-gray-400">{project.technologies}</p>
-                <p className="text-sm text-gray-500">{project.link}</p>
-                <p className="text-sm mt-2">{project.description}</p>
-              </div>
-            ))}
-          </div>
-        )}
-        {data.publications && data.publications.length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Publications</h3>
-            {data.publications.map((pub: any, index: number) => (
-              <div key={index} className="mb-4">
-                <p className="font-medium">{pub.title}</p>
-                <p className="text-sm text-gray-700">Authors: {pub.authors}</p>
-                <p className="text-sm text-gray-700">Journal: {pub.journal}</p>
-                <p className="text-sm text-gray-700">Year: {pub.year}</p>
-                {pub.links && pub.links.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium">Links:</p>
-                    {pub.links.map((link: any, linkIndex: number) => (
-                      <a
-                        key={linkIndex}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700"
-                      >
-                        {link.type}
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-        <div>
-          <h3 className="text-lg font-semibold mb-3">Education</h3>
-          {data.education.map((edu: any, index: number) => (
-            <div key={index} className="mb-3">
-              <p className="font-medium">{edu.degree}</p>
-              <p className="text-sm">{edu.institution}</p>
-              <p className="text-sm text-gray-600">{edu.dates}</p>
-              <p className="text-sm">{edu.location}</p>
+        </section>
+      )}
+
+      {/* Optional: Publications */}
+      {data.publications && data.publications.length > 0 && (
+        <section>
+          <h2 className="text-lg font-extrabold uppercase mb-2">Publications</h2>
+          {data.publications.map((pub, i) => (
+            <div key={i} className="mb-4">
+              <p className="text-sm font-bold">{pub.title}</p>
+              <p className="text-xs text-gray-600">
+                Authors: {pub.authors} • Journal: {pub.journal} • Year: {pub.year}
+              </p>
+              {pub.links && pub.links.length > 0 && (
+                <div className="text-xs mt-1">
+                  {pub.links.map((link, li) => (
+                    <a
+                      key={li}
+                      href={link.url}
+                      className="text-blue-700 underline mr-2"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {link.type}
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
-        </div>
-      </div>
+        </section>
+      )}
     </div>
-  )
+  );
 }
