@@ -1099,6 +1099,9 @@ import {
   ExecutiveTemplate,
 } from "@/components/resume-templates"
 import jsPDF from "jspdf";
+
+
+
 interface ResumeData {
   personalInfo: {
     name: string
