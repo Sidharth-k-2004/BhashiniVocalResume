@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 
 export default function ForgotPasswordPage() {
-  const [step, setStep] = useState(1); // 1 = request, 2 = verify
+  const [step, setStep] = useState(1); 
   const [email, setEmail] = useState('');
   const [key, setKey] = useState('');
   const [newPassword, setNewPassword] = useState('');

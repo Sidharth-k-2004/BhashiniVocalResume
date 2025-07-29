@@ -28,7 +28,6 @@ import base64
 import jwt
 from flask_mail import Mail, Message
 
-# Load environment variables from .env file
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -43,13 +42,10 @@ app.config['MAIL_USERNAME'] = os.environ.get("GMAIL_USER")
 app.config['MAIL_PASSWORD'] = os.environ.get("GMAIL_PASS")   
 mail = Mail(app)
 
-# Configuration
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  
 
-# Database URI - now properly reading from .env
 DATABASE_URL = os.environ.get("DATABASE_URL")
 if not DATABASE_URL:
-    # Use SQLite as fallback
     DATABASE_URL = "sqlite:///vocalresume.db"
     print("Using SQLite database as fallback")
 else:
@@ -59,37 +55,30 @@ app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'my-very-secret-key'
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']
-app.config['JWT_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
-app.config['JWT_COOKIE_CSRF_PROTECT'] = False  # Set to True in production
+app.config['JWT_COOKIE_SECURE'] = False  
+app.config['JWT_COOKIE_CSRF_PROTECT'] = False  
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(hours=24)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 
-# Initialize extensions
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
 
-# Ensure upload directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Configure OpenRouter API
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
-# SerpAPI Configuration
 SERPAPI_KEY = os.environ.get("SERPAPI_KEY")
 
-# Bhashini API Configuration - now properly reading from .env
 BHASHINI_USER_ID = os.environ.get("BHASHINI_USER_ID")
 BHASHINI_API_KEY = os.environ.get("BHASHINI_API_KEY")
 BHASHINI_BASE_URL = "https://meity-auth.ulcacontrib.org"
 BHASHINI_COMPUTE_URL = "https://dhruva-api.bhashini.gov.in/services/inference"
 
-# Debug: Print loaded environment variables (remove in production)
 print(f"Loaded BHASHINI_USER_ID: {BHASHINI_USER_ID}")
 print(f"Loaded BHASHINI_API_KEY: {BHASHINI_API_KEY[:10]}..." if BHASHINI_API_KEY else "BHASHINI_API_KEY not loaded")
 print(f"Loaded SERPAPI_KEY: {SERPAPI_KEY[:10]}..." if SERPAPI_KEY else "SERPAPI_KEY not loaded")
 
-# Check for FFmpeg
 def check_ffmpeg():
     """Check if FFmpeg is available"""
     ffmpeg_path = which("ffmpeg")
@@ -103,10 +92,8 @@ def check_ffmpeg():
         print("2. Add to system PATH")
         return False
 
-# Check FFmpeg availability on startup
 ffmpeg_available = check_ffmpeg()
 
-# Database Models
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -118,7 +105,7 @@ class User(db.Model):
 class Resume(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    template_id = db.Column(db.String(10), nullable=False)  # Changed to String to support p1, c1, etc.
+    template_id = db.Column(db.String(10), nullable=False)  
     template_name = db.Column(db.String(50), nullable=False)
     resume_data = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
@@ -130,7 +117,6 @@ class PasswordReset(db.Model):
     reset_key = db.Column(db.String(6), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
-# Updated Template mapping with string keys
 TEMPLATES = {
     "p1": "Professional Corporate",
     "p2": "Professional Business",         
@@ -154,7 +140,6 @@ TEMPLATES = {
     "e5": "Executive Elite"
 }
 
-# Helper function to validate template ID
 def is_valid_template_id(template_id):
     """Validate if template_id is in the correct format and exists"""
     return template_id in TEMPLATES
@@ -170,9 +155,9 @@ def get_template_style_category(template_id):
     elif template_id.startswith('e'):
         return 'executive'
     else:
-        return 'professional'  # default
+        return 'professional'  
+    
 
-# Enhanced Research Paper Search Functions
 def search_papers_with_openrouter(paper_titles):
     """Search for research papers using OpenRouter API"""
     if not paper_titles:
@@ -226,7 +211,7 @@ Only return valid JSON, no markdown formatting."""
         if not response_text:
             return []
         
-        # Clean up the response
+       
         raw_json_str = response_text.strip()
         
         if raw_json_str.startswith("```json"):
@@ -250,12 +235,11 @@ def search_papers_with_serpapi(paper_titles):
     
     for title in paper_titles:
         try:
-            # Search Google Scholar via SerpAPI
             params = {
                 'engine': 'google_scholar',
                 'q': title,
                 'api_key': SERPAPI_KEY,
-                'num': 3  # Get top 3 results
+                'num': 3  
             }
             
             response = requests.get('https://serpapi.com/search', params=params, timeout=10)
@@ -277,7 +261,6 @@ def search_papers_with_serpapi(paper_titles):
                     links.append(link_info)
                     found = True
                 
-                # Check for PDF links
                 if result.get('resources'):
                     for resource in result['resources']:
                         if resource.get('link') and 'pdf' in resource.get('title', '').lower():
@@ -308,10 +291,8 @@ def search_research_papers(paper_titles):
     """Search for research papers using OpenRouter first, then SerpAPI as fallback"""
     print(f"Searching for papers: {paper_titles}")
     
-    # Try OpenRouter first
     papers_with_links = search_papers_with_openrouter(paper_titles)
     
-    # If OpenRouter didn't find links for some papers, try SerpAPI
     if SERPAPI_KEY:
         unfound_papers = []
         for paper in papers_with_links:
@@ -322,10 +303,8 @@ def search_research_papers(paper_titles):
             print(f"Using SerpAPI fallback for: {unfound_papers}")
             serpapi_results = search_papers_with_serpapi(unfound_papers)
             
-            # Merge results
             for i, paper in enumerate(papers_with_links):
                 if paper['title'] in unfound_papers:
-                    # Find corresponding SerpAPI result
                     for serpapi_paper in serpapi_results:
                         if serpapi_paper['title'] == paper['title']:
                             papers_with_links[i] = serpapi_paper
@@ -333,7 +312,6 @@ def search_research_papers(paper_titles):
     
     return papers_with_links
 
-# Bhashini API Helper Functions
 def get_bhashini_auth_token():
     """Get authentication token from Bhashini"""
     if not BHASHINI_USER_ID or not BHASHINI_API_KEY:
@@ -350,7 +328,6 @@ def get_bhashini_auth_token():
         "Content-Type": "application/json"
     }
     
-    # Request for ASR (Automatic Speech Recognition) pipeline
     payload = {
         "pipelineTasks": [
             {
@@ -375,7 +352,7 @@ def get_bhashini_auth_token():
         result = response.json()
         print("Bhashini authentication successful!")
         
-        # Extract the service ID and authorization details
+       
         if result.get("pipelineResponseConfig"):
             pipeline_config = result["pipelineResponseConfig"][0]
             service_id = pipeline_config["config"][0]["serviceId"]
@@ -400,13 +377,11 @@ def get_bhashini_auth_token():
 def transcribe_with_bhashini(audio_file_path, language="en"):
     """Transcribe audio using Bhashini API"""
     
-    # Get authentication details
     auth_details = get_bhashini_auth_token()
     if not auth_details:
         print("Failed to get Bhashini authentication")
         return None
-    
-    # Convert audio to base64
+
     try:
         with open(audio_file_path, "rb") as audio_file:
             audio_base64 = base64.b64encode(audio_file.read()).decode('utf-8')
@@ -414,7 +389,6 @@ def transcribe_with_bhashini(audio_file_path, language="en"):
         print(f"Error reading audio file: {e}")
         return None
     
-    # Prepare the request payload
     payload = {
         "pipelineTasks": [
             {
@@ -442,7 +416,6 @@ def transcribe_with_bhashini(audio_file_path, language="en"):
         "Content-Type": "application/json"
     }
     
-    # Add authorization if available
     if auth_details.get("authToken"):
         headers["Authorization"] = auth_details["authToken"]
     
@@ -459,7 +432,7 @@ def transcribe_with_bhashini(audio_file_path, language="en"):
         result = response.json()
         print("Bhashini transcription completed!")
         
-        # Extract transcribed text
+        
         if result.get("pipelineResponse") and len(result["pipelineResponse"]) > 0:
             asr_response = result["pipelineResponse"][0]
             if asr_response.get("output") and len(asr_response["output"]) > 0:
@@ -483,7 +456,6 @@ def convert_audio_for_bhashini(audio_file_path):
     """Convert audio file to format suitable for Bhashini (WAV, 16kHz)"""
     if not ffmpeg_available:
         print("FFmpeg not available. Trying to use original file...")
-        # If it's already a WAV file, try to use it as-is
         if audio_file_path.lower().endswith('.wav'):
             return audio_file_path
         else:
@@ -491,19 +463,15 @@ def convert_audio_for_bhashini(audio_file_path):
             return None
     
     try:
-        # Load audio file
         audio = AudioSegment.from_file(audio_file_path)
         
-        # Convert to mono, 16kHz WAV
-        audio = audio.set_channels(1)  # Mono
-        audio = audio.set_frame_rate(16000)  # 16kHz sampling rate
+        audio = audio.set_channels(1) 
+        audio = audio.set_frame_rate(16000)  
         
-        # Create temporary WAV file with proper path handling
         base_name = os.path.splitext(os.path.basename(audio_file_path))[0]
         temp_dir = os.path.dirname(audio_file_path)
         wav_path = os.path.join(temp_dir, f"{base_name}_converted.wav")
         
-        # Export the converted audio
         audio.export(wav_path, format="wav")
         
         print(f"Audio converted successfully: {wav_path}")
@@ -513,13 +481,12 @@ def convert_audio_for_bhashini(audio_file_path):
         print(f"Error converting audio: {e}")
         return None
 
-# Fallback transcription using SpeechRecognition (Google)
+
 def transcribe_with_google_fallback(audio_file_path):
     """Fallback transcription using Google Speech Recognition"""
     recognizer = sr.Recognizer()
     
     try:
-        # Convert to WAV if needed and possible
         if not audio_file_path.lower().endswith('.wav') and ffmpeg_available:
             audio = AudioSegment.from_file(audio_file_path)
             wav_io = io.BytesIO()
@@ -532,7 +499,6 @@ def transcribe_with_google_fallback(audio_file_path):
             with sr.AudioFile(audio_file_path) as source:
                 audio_data = recognizer.record(source)
         
-        # Use Google's speech recognition
         print("Using Google Speech Recognition...")
         text = recognizer.recognize_google(audio_data)
         return text
@@ -541,7 +507,7 @@ def transcribe_with_google_fallback(audio_file_path):
         print(f"Error in Google speech recognition: {e}")
         return None
 
-# Helper Functions
+
 def call_openrouter_api(prompt, model="openai/gpt-4o-mini"):
     """Call OpenRouter API with the given prompt"""
     headers = {
@@ -669,7 +635,6 @@ ONLY return the JSON object, nothing else. Do not include any markdown formattin
         if not response_text:
             return None
         
-        # Clean up the response
         raw_json_str = response_text.strip()
         
         if raw_json_str.startswith("```json"):
@@ -679,7 +644,6 @@ ONLY return the JSON object, nothing else. Do not include any markdown formattin
         
         parsed_json = json.loads(raw_json_str)
         
-        # Search for publication links if publications are mentioned
         if parsed_json.get('publications') and len(parsed_json['publications']) > 0:
             paper_titles = []
             for pub in parsed_json['publications']:
@@ -690,7 +654,6 @@ ONLY return the JSON object, nothing else. Do not include any markdown formattin
                 print(f"Found {len(paper_titles)} publications from audio, searching for links...")
                 print(f"Publication titles: {paper_titles}")
                 
-                # Log the extracted publication details before search
                 for i, pub in enumerate(parsed_json['publications']):
                     print(f"Publication {i+1}:")
                     print(f"  Title: {pub.get('title', 'Not specified')}")
@@ -700,11 +663,9 @@ ONLY return the JSON object, nothing else. Do not include any markdown formattin
                 
                 papers_with_links = search_research_papers(paper_titles)
                 
-                # Update publications with found links (preserve existing author/year info)
                 for i, pub in enumerate(parsed_json['publications']):
                     for paper in papers_with_links:
                         if paper['title'] == pub['title']:
-                            # Only update links, preserve author and year info from audio
                             pub['links'] = paper.get('links', [])
                             print(f"Added {len(pub['links'])} links to publication: {pub['title']}")
                             break
@@ -721,20 +682,16 @@ ONLY return the JSON object, nothing else. Do not include any markdown formattin
 
 def generate_pdf(resume_data, template_id):
     """Generate PDF from resume data based on template"""
-    # Create a temporary file to store the PDF
     with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as temp_file:
         pdf_path = temp_file.name
     
-    # Get template style category and name
     template_name = TEMPLATES.get(template_id, "Professional Classic")
     style_category = get_template_style_category(template_id)
     
-    # Create PDF document
     doc = SimpleDocTemplate(pdf_path, pagesize=letter)
     styles = getSampleStyleSheet()
     elements = []
     
-    # Add custom styles based on template category
     if style_category == "professional":
         title_style = ParagraphStyle(
             'Title',
@@ -803,11 +760,9 @@ def generate_pdf(resume_data, template_id):
         )
         normal_style = styles['Normal']
     
-    # Personal Information
     personal_info = resume_data.get('personalInfo', {})
     elements.append(Paragraph(personal_info.get('name', ''), title_style))
-    
-    # Contact information
+
     contact_info = []
     if personal_info.get('email'):
         contact_info.append(personal_info['email'])
@@ -821,13 +776,11 @@ def generate_pdf(resume_data, template_id):
     
     elements.append(Spacer(1, 0.2 * inch))
     
-    # Summary
     if resume_data.get('summary'):
         elements.append(Paragraph('PROFESSIONAL SUMMARY', heading_style))
         elements.append(Paragraph(resume_data['summary'], normal_style))
         elements.append(Spacer(1, 0.2 * inch))
-    
-    # Experience
+
     if resume_data.get('experience'):
         elements.append(Paragraph('EXPERIENCE', heading_style))
         for exp in resume_data['experience']:
@@ -856,8 +809,7 @@ def generate_pdf(resume_data, template_id):
             elements.append(Spacer(1, 0.1 * inch))
         
         elements.append(Spacer(1, 0.1 * inch))
-    
-    # Education
+
     if resume_data.get('education'):
         elements.append(Paragraph('EDUCATION', heading_style))
         for edu in resume_data['education']:
@@ -884,7 +836,7 @@ def generate_pdf(resume_data, template_id):
         
         elements.append(Spacer(1, 0.1 * inch))
     
-    # Publications - Enhanced with author names and years
+
     if resume_data.get('publications') and len(resume_data['publications']) > 0:
         elements.append(Paragraph('PUBLICATIONS', heading_style))
         for pub in resume_data['publications']:
@@ -894,11 +846,9 @@ def generate_pdf(resume_data, template_id):
             year = pub.get('year', '')
             links = pub.get('links', [])
             
-            # Publication title
             if title:
                 elements.append(Paragraph(f"<b>{title}</b>", normal_style))
             
-            # Authors and publication details
             pub_info = []
             if authors:
                 pub_info.append(f"Authors: {authors}")
@@ -910,7 +860,6 @@ def generate_pdf(resume_data, template_id):
             if pub_info:
                 elements.append(Paragraph(' | '.join(pub_info), normal_style))
             
-            # Links
             if links:
                 link_texts = []
                 for link in links:
@@ -922,18 +871,15 @@ def generate_pdf(resume_data, template_id):
         
         elements.append(Spacer(1, 0.1 * inch))
     
-    # Skills
     if resume_data.get('skills'):
         elements.append(Paragraph('SKILLS', heading_style))
         skills_text = ', '.join(resume_data['skills'])
         elements.append(Paragraph(skills_text, normal_style))
-    
-    # Build the PDF
+
     doc.build(elements)
     
     return pdf_path
 
-# Add these new endpoints to your Flask backend (app.py)
 @app.route('/api/process-guided-audio', methods=['POST'])
 @jwt_required()
 def process_guided_audio():
@@ -951,7 +897,6 @@ def process_guided_audio():
     if not audio_file.filename:
         return jsonify({'message': 'No audio file selected'}), 400
     
-    # Save the uploaded file temporarily
     file_ext = os.path.splitext(audio_file.filename)[1]
     audio_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{uuid.uuid4()}{file_ext}")
     audio_file.save(audio_path)
@@ -960,14 +905,12 @@ def process_guided_audio():
     transcript = None
     
     try:
-        # Try Bhashini first if configured
         if BHASHINI_USER_ID and BHASHINI_API_KEY:
             print("Attempting transcription with Bhashini...")
             converted_audio_path = convert_audio_for_bhashini(audio_path)
             if converted_audio_path:
                 transcript = transcribe_with_bhashini(converted_audio_path, language)
         
-        # Fallback to Google Speech Recognition if Bhashini fails
         if not transcript:
             print("Bhashini failed or not configured. Falling back to Google Speech Recognition...")
             transcript = transcribe_with_google_fallback(audio_path)
@@ -977,7 +920,6 @@ def process_guided_audio():
         
         print(f"Transcript for question {question_id}: {transcript}")
         
-        # Process the transcript to extract a clean answer for the specific question
         processed_answer = process_guided_transcript(transcript, question, question_id)
         
         return jsonify({
@@ -992,7 +934,6 @@ def process_guided_audio():
         return jsonify({'message': f'Error processing audio: {str(e)}'}), 500
         
     finally:
-        # Clean up temporary files
         if os.path.exists(audio_path):
             os.remove(audio_path)
         if converted_audio_path and os.path.exists(converted_audio_path):
@@ -1027,10 +968,8 @@ Return only the cleaned answer, nothing else:"""
         if not response_text:
             return transcript
         
-        # Clean up the response
         cleaned_answer = response_text.strip()
         
-        # Remove any quotes if the AI wrapped the response
         if cleaned_answer.startswith('"') and cleaned_answer.endswith('"'):
             cleaned_answer = cleaned_answer[1:-1]
         
@@ -1055,13 +994,11 @@ def generate_guided_resume():
         return jsonify({'message': 'No answers provided'}), 400
     
     try:
-        # Convert guided answers to structured resume data
         resume_data = convert_guided_answers_to_resume(answers)
         
         if not resume_data:
             return jsonify({'message': 'Failed to process answers'}), 500
         
-        # Create a new resume entry in the database
         new_resume = Resume(
             user_id=current_user_id,
             template_id=template_id,
@@ -1084,7 +1021,6 @@ def generate_guided_resume():
 def convert_guided_answers_to_resume(answers):
     """Convert guided mode answers to structured resume JSON"""
     
-    # Create the prompt for converting answers to resume structure
     answers_text = "\n".join([f"{key}: {value}" for key, value in answers.items() if value.strip()])
     
     resume_structure = {
@@ -1168,7 +1104,6 @@ ONLY return the JSON object, nothing else. Do not include any markdown formattin
         if not response_text:
             return None
         
-        # Clean up the response
         raw_json_str = response_text.strip()
         
         if raw_json_str.startswith("```json"):
@@ -1178,7 +1113,6 @@ ONLY return the JSON object, nothing else. Do not include any markdown formattin
         
         parsed_json = json.loads(raw_json_str)
         
-        # Search for publication links if publications are mentioned
         if parsed_json.get('publications') and len(parsed_json['publications']) > 0:
             paper_titles = []
             for pub in parsed_json['publications']:
@@ -1189,7 +1123,6 @@ ONLY return the JSON object, nothing else. Do not include any markdown formattin
                 print(f"Found {len(paper_titles)} publications from guided answers, searching for links...")
                 papers_with_links = search_research_papers(paper_titles)
                 
-                # Update publications with found links
                 for i, pub in enumerate(parsed_json['publications']):
                     for paper in papers_with_links:
                         if paper['title'] == pub['title']:
@@ -1207,7 +1140,6 @@ ONLY return the JSON object, nothing else. Do not include any markdown formattin
         print(f"Error in convert_guided_answers_to_resume: {e}")
         return None
 
-# Routes
 @app.route('/api/signup', methods=['POST'])
 def signup():
     data = request.json
@@ -1217,12 +1149,10 @@ def signup():
     
     if not username or not email or not password:
         return jsonify({'message': 'Missing required fields'}), 400
-    
-    # Check if user already exists
+
     if User.query.filter_by(username=username).first() or User.query.filter_by(email=email).first():
         return jsonify({'message': 'Username or email already exists'}), 409
     
-    # Create new user
     hashed_password = generate_password_hash(password)
     new_user = User(username=username, email=email, password=hashed_password)
     db.session.add(new_user)
@@ -1238,14 +1168,12 @@ def login():
     
     if not email or not password:
         return jsonify({'message': 'Missing email or password'}), 400
-    
-    # Find user by email
+   
     user = User.query.filter_by(email=email).first()
     
     if not user or not check_password_hash(user.password, password):
         return jsonify({'message': 'Invalid email or password'}), 401
     
-    # Create access token
     access_token = create_access_token(identity=str(user.id))
     
     response = jsonify({'message': 'Login successful'})
@@ -1273,20 +1201,18 @@ def process_audio():
         return jsonify({'message': 'No audio file provided'}), 400
     
     audio_file = request.files['audio']
-    template_id = request.form.get('templateId', 'p1')  # Default to p1 instead of '1'
+    template_id = request.form.get('templateId', 'p1') 
     language = request.form.get('language', 'en')
     
     app.logger.debug("Starting audio processing")
     
     if not audio_file.filename:
         return jsonify({'message': 'No audio file selected'}), 400
-    
-    # Validate templateId
+
     if not is_valid_template_id(template_id):
         app.logger.error(f"Invalid templateId: {template_id}")
         return jsonify({'message': f"Invalid templateId: {template_id}. Valid IDs: {list(TEMPLATES.keys())}"}), 400
-    
-    # Save the uploaded file temporarily
+   
     file_ext = os.path.splitext(audio_file.filename)[1]
     audio_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{uuid.uuid4()}{file_ext}")
     audio_file.save(audio_path)
@@ -1295,14 +1221,12 @@ def process_audio():
     transcript = None
     
     try:
-        # Try Bhashini first if configured
         if BHASHINI_USER_ID and BHASHINI_API_KEY:
             print("Attempting transcription with Bhashini...")
             converted_audio_path = convert_audio_for_bhashini(audio_path)
             if converted_audio_path:
                 transcript = transcribe_with_bhashini(converted_audio_path, language)
         
-        # Fallback to Google Speech Recognition if Bhashini fails
         if not transcript:
             print("Bhashini failed or not configured. Falling back to Google Speech Recognition...")
             transcript = transcribe_with_google_fallback(audio_path)
@@ -1312,13 +1236,11 @@ def process_audio():
         
         print(f"Transcript: {transcript}")
         
-        # Convert the transcription to JSON using OpenRouter with enhanced publication extraction
         response_json = convert_text_to_json(transcript)
         
         if not response_json:
             return jsonify({'message': 'Failed to process transcript with OpenRouter'}), 500
         
-        # Create a new resume entry in the database
         new_resume = Resume(
             user_id=current_user_id,
             template_id=template_id,
@@ -1340,7 +1262,6 @@ def process_audio():
         return jsonify({'message': f'Error processing audio: {str(e)}'}), 500
         
     finally:
-        # Clean up temporary files
         if os.path.exists(audio_path):
             os.remove(audio_path)
         if converted_audio_path and os.path.exists(converted_audio_path):
@@ -1377,7 +1298,6 @@ def update_resume(resume_id):
     
     data = request.json
     
-    # Update resume data
     resume.resume_data = json.dumps(data)
     resume.updated_at = datetime.datetime.utcnow()
     
@@ -1406,12 +1326,10 @@ def process_audio_edit():
         return jsonify({'message': 'No resume data provided'}), 400
     
     try:
-        # Parse the current resume data
         current_resume_data = json.loads(resume_data_str)
     except json.JSONDecodeError:
         return jsonify({'message': 'Invalid resume data format'}), 400
     
-    # Save the uploaded file temporarily
     file_ext = os.path.splitext(audio_file.filename)[1]
     audio_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{uuid.uuid4()}{file_ext}")
     audio_file.save(audio_path)
@@ -1420,14 +1338,12 @@ def process_audio_edit():
     transcript = None
     
     try:
-        # Try Bhashini first if configured
         if BHASHINI_USER_ID and BHASHINI_API_KEY:
             print("Attempting transcription with Bhashini...")
             converted_audio_path = convert_audio_for_bhashini(audio_path)
             if converted_audio_path:
                 transcript = transcribe_with_bhashini(converted_audio_path, language)
         
-        # Fallback to Google Speech Recognition if Bhashini fails
         if not transcript:
             print("Bhashini failed or not configured. Falling back to Google Speech Recognition...")
             transcript = transcribe_with_google_fallback(audio_path)
@@ -1437,7 +1353,6 @@ def process_audio_edit():
         
         print(f"Edit command transcript: {transcript}")
         
-        # Process the edit command and apply changes to resume data
         result = apply_audio_edits_to_resume(transcript, current_resume_data)
         
         if not result:
@@ -1455,7 +1370,6 @@ def process_audio_edit():
         return jsonify({'message': f'Error processing audio edit: {str(e)}'}), 500
         
     finally:
-        # Clean up temporary files
         if os.path.exists(audio_path):
             os.remove(audio_path)
         if converted_audio_path and os.path.exists(converted_audio_path):
@@ -1584,41 +1498,33 @@ IMPORTANT JSON RULES:
         if not response_text:
             return None
         
-        # Clean up the response
         raw_json_str = response_text.strip()
         
-        # Remove markdown formatting if present
         if raw_json_str.startswith("```json"):
             raw_json_str = re.sub(r"^```json\s*", "", raw_json_str)
         if raw_json_str.endswith("```"):
             raw_json_str = raw_json_str[:-3].strip()
         
-        # Parse the JSON response
         parsed_result = json.loads(raw_json_str)
         
-        # Validate the response structure
         if 'updatedData' not in parsed_result or 'changes' not in parsed_result:
             print("Invalid response structure from OpenRouter")
             return None
         
-        # Ensure skills is always an array
         if 'skills' in parsed_result['updatedData']:
             skills = parsed_result['updatedData']['skills']
             if isinstance(skills, str):
                 parsed_result['updatedData']['skills'] = [s.strip() for s in skills.split(',') if s.strip()]
         
-        # Search for publication links if new publications were added
         publications_to_search = parsed_result.get('publicationsToSearch', [])
         if publications_to_search:
             print(f"Searching for publication links: {publications_to_search}")
             papers_with_links = search_research_papers(publications_to_search)
             
-            # Update publications with found links (preserve existing author/year info from audio)
             if 'publications' in parsed_result['updatedData']:
                 for pub in parsed_result['updatedData']['publications']:
                     for paper in papers_with_links:
                         if paper['title'] == pub['title']:
-                            # Only update links, preserve author and year info from audio
                             pub['links'] = paper.get('links', [])
                             print(f"Added {len(pub['links'])} links to publication: {pub['title']}")
                             break
@@ -1660,7 +1566,6 @@ def download_resume(resume_id):
     
     resume_data = json.loads(resume.resume_data)
     
-    # Generate PDF
     pdf_path = generate_pdf(resume_data, resume.template_id)
     
     try:
@@ -1671,7 +1576,6 @@ def download_resume(resume_id):
             mimetype='application/pdf'
         )
     finally:
-        # Clean up temporary file after sending
         if os.path.exists(pdf_path):
             os.unlink(pdf_path)
 
@@ -1719,7 +1623,6 @@ def get_templates():
     
     return jsonify({'templates': template_list}), 200
 
-# New endpoint to manually search for research papers
 @app.route('/api/search-publications', methods=['POST'])
 @jwt_required()
 def search_publications():
@@ -1740,7 +1643,6 @@ def search_publications():
     except Exception as e:
         return jsonify({'message': f'Error searching publications: {str(e)}'}), 500
 
-# Test endpoints
 @app.route('/api/test-bhashini', methods=['GET'])
 def test_bhashini():
     """Test endpoint to check Bhashini API connectivity"""
@@ -1761,7 +1663,6 @@ def test_serpapi():
         return jsonify({'message': 'SerpAPI key not configured'}), 400
     
     try:
-        # Test search with a simple query
         params = {
             'engine': 'google_scholar',
             'q': 'machine learning',
@@ -1796,7 +1697,6 @@ def system_status():
         'template_count': len(TEMPLATES)
     }), 200
 
-# Create database tables
 with app.app_context():
     try:
         db.create_all()
@@ -1805,10 +1705,9 @@ with app.app_context():
         print(f"Error creating database tables: {e}")
 
 users_db = {
-    "sidharthkdinesan123@gmail.com": {"name": "Sidharth"}  # Add dummy user for test
+    "sidharthkdinesan123@gmail.com": {"name": "Sidharth"} 
 }
 
-# Send reset key to email
 @app.route('/api/request-password-reset', methods=['POST'])
 def request_password_reset():
     data = request.get_json()
@@ -1826,7 +1725,6 @@ def request_password_reset():
     db.session.commit()
     return jsonify({'message': 'Reset key sent to your email'})
 
-# Verify reset key
 @app.route('/api/verify-reset-key', methods=['POST'])
 def verify_reset_key():
     data = request.get_json()
@@ -1845,11 +1743,10 @@ def reset_password():
     new_password = data.get('newPassword')
     if not all([email, key, new_password]):
         return jsonify({'error': 'Missing fields'}), 400
-    # Verify key
     record = PasswordReset.query.filter_by(email=email, reset_key=key).first()
     if not record:
         return jsonify({'error': 'Invalid or expired reset key'}), 400
-    # Reset password
+    
     user = User.query.filter_by(email=email).first()
     if not user:
         return jsonify({'error': 'User not found'}), 404
@@ -1858,7 +1755,6 @@ def reset_password():
     db.session.commit()
     return jsonify({'message': 'Password successfully reset'}), 200
 
-# Reset password
 if __name__ == '__main__':
     print("=== System Status ===")
     print(f"FFmpeg available: {ffmpeg_available}")

@@ -20,11 +20,9 @@ export default function EditResumePage() {
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
-    // Load resume data
     const loadResumeData = async () => {
       try {
         if (resumeId) {
-          // If we have a resumeId, fetch from API
           try {
             const response = await fetch(`http://localhost:5000/api/resume/${resumeId}`, {
               credentials: "include",
@@ -37,7 +35,6 @@ export default function EditResumePage() {
             }
           } catch (error) {
             console.error("API fetch error:", error)
-            // Fall back to localStorage if API fails
             const storedData = localStorage.getItem("resumeData")
             if (storedData) {
               handleStoredData(storedData)
@@ -46,7 +43,6 @@ export default function EditResumePage() {
             }
           }
         } else {
-          // No resumeId, try localStorage
           const storedData = localStorage.getItem("resumeData")
           if (storedData) {
             handleStoredData(storedData)

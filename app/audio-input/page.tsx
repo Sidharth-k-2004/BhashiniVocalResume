@@ -14,7 +14,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandList, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
 import { cn } from "@/lib/utils"
 
-// Define languages supported by Bhashini (example subset)
 const languages = [
   { code: "en", name: "English" },
   { code: "hi", name: "Hindi" },
@@ -26,27 +25,25 @@ const languages = [
   { code: "mr", name: "Marathi" },
   { code: "pa", name: "Punjabi" },
   { code: "te", name: "Telugu" },
-  // Add more languages as supported by Bhashini
 ]
 
 export default function AudioInputPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const templateId = searchParams.get("template") // templateId will be a string like "p1", "c2"
+  const templateId = searchParams.get("template") 
   const categoryId = searchParams.get("category")
 
   const [isRecording, setIsRecording] = useState(false)
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const [isUploading, setIsUploading] = useState(false)
-  const [isLoading, setIsLoading] = useState(false) // Not currently used, but kept for consistency
-  const [selectedLanguage, setSelectedLanguage] = useState("en") // New state for selected language
-  const [openLanguageSelect, setOpenLanguageSelect] = useState(false) // For the combobox popover
+  const [isLoading, setIsLoading] = useState(false) 
+  const [selectedLanguage, setSelectedLanguage] = useState("en") 
+  const [openLanguageSelect, setOpenLanguageSelect] = useState(false) 
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
 
   useEffect(() => {
-    // Check if template is selected
     if (!templateId) {
       toast({
         title: "No template selected",
@@ -70,7 +67,6 @@ export default function AudioInputPage() {
       mediaRecorderRef.current.onstop = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" })
         setAudioBlob(audioBlob)
-        // Stop all tracks on the stream to release the microphone
         stream.getTracks().forEach((track) => track.stop())
       }
       mediaRecorderRef.current.start()

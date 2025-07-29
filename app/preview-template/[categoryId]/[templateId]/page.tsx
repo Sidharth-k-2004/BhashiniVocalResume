@@ -12,20 +12,16 @@
 //   ExecutiveTemplate,
 // } from "@/components/resume-templates"
 
-
 // export default function PreviewTemplate({
 //   params,
 // }: {
-//   // params: { categoryId: string; templateId: string }
-//    params: Promise<{ categoryId: string; templateId: string }>
+//   params: Promise<{ categoryId: string; templateId: string }>
 // }) {
 //   const [isLoading, setIsLoading] = useState(true)
 //   const [showModeSelection, setShowModeSelection] = useState(false)
 //   const router = useRouter()
-//   // const { categoryId, templateId } = params
 //   const { categoryId, templateId } = use(params)
 
-//   // Template categories mapping for display purposes
 //   const categoryNames: Record<string, string> = {
 //     "1": "Professional",
 //     "2": "Creative",
@@ -33,27 +29,22 @@
 //     "4": "Executive",
 //   }
 
-//   // Template names mapping
 //   const templateNames: Record<string, string> = {
-//     // Professional templates
 //     p1: "Corporate",
 //     p2: "Business",
 //     p3: "Executive Pro",
 //     p4: "Modern Professional",
 //     p5: "Classic",
-//     // Creative templates
 //     c1: "Designer",
 //     c2: "Artistic",
 //     c3: "Digital Creative",
 //     c4: "Portfolio Plus",
 //     c5: "Innovation",
-//     // Minimal templates
 //     m1: "Clean",
 //     m2: "Simplicity",
 //     m3: "Essentials",
 //     m4: "Minimalist Pro",
 //     m5: "Whitespace",
-//     // Executive templates
 //     e1: "Leadership",
 //     e2: "C-Suite",
 //     e3: "Director",
@@ -61,7 +52,6 @@
 //     e5: "Executive Elite",
 //   }
 
-//   // Sample data for preview - NOW INCLUDING PUBLICATIONS
 //   const sampleData = {
 //     personalInfo: {
 //       name: "Dr. Sarah Johnson",
@@ -232,11 +222,10 @@
 //     )
 //   }
 
-//   // Render the appropriate template based on the template ID
 //   const renderTemplate = () => {
-//     // First character of template ID indicates the category
 //     const templateType = templateId.charAt(0)
 //     const templateNumber = templateId.substring(1)
+
 //     switch (templateType) {
 //       case "p":
 //         return <ProfessionalTemplate variant={templateNumber} data={sampleData} />
@@ -332,6 +321,9 @@
 
 
 
+
+
+
 "use client"
 
 import { use, useEffect, useState } from "react"
@@ -356,7 +348,6 @@ export default function PreviewTemplate({
   const router = useRouter()
   const { categoryId, templateId } = use(params)
 
-  // Template categories mapping for display purposes
   const categoryNames: Record<string, string> = {
     "1": "Professional",
     "2": "Creative",
@@ -364,27 +355,22 @@ export default function PreviewTemplate({
     "4": "Executive",
   }
 
-  // Template names mapping
   const templateNames: Record<string, string> = {
-    // Professional templates
     p1: "Corporate",
     p2: "Business",
     p3: "Executive Pro",
     p4: "Modern Professional",
     p5: "Classic",
-    // Creative templates
     c1: "Designer",
     c2: "Artistic",
     c3: "Digital Creative",
     c4: "Portfolio Plus",
     c5: "Innovation",
-    // Minimal templates
     m1: "Clean",
     m2: "Simplicity",
     m3: "Essentials",
     m4: "Minimalist Pro",
     m5: "Whitespace",
-    // Executive templates
     e1: "Leadership",
     e2: "C-Suite",
     e3: "Director",
@@ -392,7 +378,6 @@ export default function PreviewTemplate({
     e5: "Executive Elite",
   }
 
-  // Sample data for preview - NOW INCLUDING PUBLICATIONS
   const sampleData = {
     personalInfo: {
       name: "Dr. Sarah Johnson",
@@ -400,6 +385,12 @@ export default function PreviewTemplate({
       email: "sarah.johnson@example.com",
       phone: "(555) 123-4567",
       location: "San Francisco, CA",
+      address: "123 Innovation Drive, San Francisco, CA 94105",
+      summary:
+        "Experienced research scientist and AI engineer with 8+ years in machine learning, computer vision, and healthcare applications.",
+      languages: "English (Native), Spanish (Fluent), Mandarin (Conversational)",
+      hobbies: "Rock climbing, Photography, Open source contributions",
+      linkedin: "https://linkedin.com/in/sarahjohnson",
     },
     summary:
       "Experienced research scientist and AI engineer with 8+ years in machine learning, computer vision, and healthcare applications. Published 15+ peer-reviewed papers and led cross-functional teams in developing innovative AI solutions.",
@@ -563,9 +554,7 @@ export default function PreviewTemplate({
     )
   }
 
-  // Render the appropriate template based on the template ID
   const renderTemplate = () => {
-    // First character of template ID indicates the category
     const templateType = templateId.charAt(0)
     const templateNumber = templateId.substring(1)
 

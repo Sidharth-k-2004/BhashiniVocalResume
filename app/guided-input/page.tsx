@@ -82,7 +82,6 @@ interface ResumeData {
 }
 
 const questions: Question[] = [
-  // Personal Information
   {
     id: "name",
     section: "Personal Information",
