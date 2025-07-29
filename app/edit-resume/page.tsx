@@ -358,11 +358,13 @@ export default function EditResumePage() {
     }
 
     // Navigate to preview
-    if (effectiveResumeId) {
-      router.push(`/resume-preview?id=${effectiveResumeId}`)
-    } else {
-      router.push(`/resume-preview?template=${templateId}&category=${categoryId}`)
-    }
+    // if (effectiveResumeId) {
+    //   router.push(`/resume-preview?id=${effectiveResumeId}`)
+    // } else {
+    //   router.push(`/resume-preview?template=${templateId}&category=${categoryId}`)
+    // }
+
+    router.push(`/resume-preview?template=${templateId}&category=${categoryId}`)
   } catch (error) {
     toast({
       title: "Error",
