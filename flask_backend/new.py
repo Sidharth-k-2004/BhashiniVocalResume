@@ -548,8 +548,147 @@ def call_openrouter_api(prompt, model="openai/gpt-4o-mini"):
         print(f"Error parsing OpenRouter response: {e}")
         return None
 
+# def convert_text_to_json(text):
+#     """Enhanced function to convert text to JSON with better publication extraction"""
+#     resume_structure = {
+#         "personalInfo": {
+#             "name": "",
+#             "title": "",
+#             "email": "",
+#             "phone": "",
+#             "location": "",
+#             "linkedin": ""
+#         },
+#         "summary": "",
+#         "experience": [
+#             {
+#                 "title": "",
+#                 "company": "",
+#                 "dates": "",
+#                 "location": "",
+#                 "description": ""
+#             }
+#         ],
+#         "education": [
+#             {
+#                 "degree": "",
+#                 "institution": "",
+#                 "dates": "",
+#                 "location": ""
+#             }
+#         ],
+#         "skills": [],
+#         "publications": [
+#             {
+#                 "title": "",
+#                 "authors": "",
+#                 "journal": "",
+#                 "year": "",
+#                 "links": []
+#             }
+#         ]
+#     }
+    
+#     prompt = f"""You are a professional resume writer with expertise in extracting academic publication information. Extract relevant information from the following transcript and format it into a JSON resume.
+
+# Here's the transcript: {text}
+
+# Please format the response as a valid JSON object with the following structure:
+# {json.dumps(resume_structure, indent=2)}
+
+# IMPORTANT INSTRUCTIONS FOR PUBLICATIONS:
+# 1. Pay special attention to any mentions of research papers, publications, academic work, or papers the person has written
+# 2. When extracting publications, carefully listen for:
+#    - Paper titles (often mentioned as "I published a paper called..." or "My paper on..." or "I wrote a paper about...")
+#    - Author names (the person speaking is likely one of the authors, but they may mention co-authors)
+#    - Publication venues (journal names, conference names like "IEEE", "ACM", "Nature", "CVPR", "ICML", etc.)
+#    - Publication years (often mentioned as "in 2023", "last year", "published in 2022", etc.)
+#    - Any collaboration mentions ("with my colleague John", "co-authored with", "joint work with")
+
+# 3. For each publication mentioned:
+#    - Extract the exact title as mentioned
+#    - Include ALL authors mentioned (if the speaker doesn't mention co-authors, just put their name)
+#    - Extract the journal/conference name if mentioned
+#    - Extract the publication year if mentioned
+#    - Leave the links array empty (will be populated by search function)
+
+# 4. Common patterns to listen for:
+#    - "I published a paper on [topic] in [journal] in [year]"
+#    - "My research on [topic] was published in [venue]"
+#    - "I co-authored a paper with [names] about [topic]"
+#    - "Our paper titled [title] appeared in [venue]"
+#    - "I have [number] publications in [field]"
+
+# 5. If the person mentions multiple papers, create separate entries for each one
+# 6. If specific details are not mentioned, leave those fields empty but still create the publication entry if a paper is mentioned
+
+# Fill in all other relevant fields (personal info, experience, education, skills) based on the transcript. If information for a field is not available, leave it empty.
+
+# For the experience and education sections, create as many entries as mentioned in the transcript.
+# For skills, extract all relevant skills mentioned.
+
+# ONLY return the JSON object, nothing else. Do not include any markdown formatting or code blocks."""
+
+#     try:
+#         response_text = call_openrouter_api(prompt, model="openai/gpt-4o-mini")
+        
+#         if not response_text:
+#             return None
+        
+#         raw_json_str = response_text.strip()
+        
+#         if raw_json_str.startswith("```json"):
+#             raw_json_str = re.sub(r"^```json\s*", "", raw_json_str)
+#         if raw_json_str.endswith("```"):
+#             raw_json_str = raw_json_str[:-3].strip()
+        
+#         parsed_json = json.loads(raw_json_str)
+        
+#         if parsed_json.get('publications') and len(parsed_json['publications']) > 0:
+#             paper_titles = []
+#             for pub in parsed_json['publications']:
+#                 if pub.get('title') and pub['title'].strip():
+#                     paper_titles.append(pub['title'])
+            
+#             if paper_titles:
+#                 print(f"Found {len(paper_titles)} publications from audio, searching for links...")
+#                 print(f"Publication titles: {paper_titles}")
+                
+#                 for i, pub in enumerate(parsed_json['publications']):
+#                     print(f"Publication {i+1}:")
+#                     print(f"  Title: {pub.get('title', 'Not specified')}")
+#                     print(f"  Authors: {pub.get('authors', 'Not specified')}")
+#                     print(f"  Journal: {pub.get('journal', 'Not specified')}")
+#                     print(f"  Year: {pub.get('year', 'Not specified')}")
+                
+#                 papers_with_links = search_research_papers(paper_titles)
+                
+#                 for i, pub in enumerate(parsed_json['publications']):
+#                     for paper in papers_with_links:
+#                         if paper['title'] == pub['title']:
+#                             pub['links'] = paper.get('links', [])
+#                             print(f"Added {len(pub['links'])} links to publication: {pub['title']}")
+#                             break
+        
+#         return parsed_json
+        
+#     except json.JSONDecodeError as e:
+#         print(f"Error parsing JSON: {e}")
+#         print(f"Raw response: {response_text}")
+#         return None
+#     except Exception as e:
+#         print(f"Error in convert_text_to_json: {e}")
+#         return None
+
+
+
+
+import json
+import re
+
 def convert_text_to_json(text):
-    """Enhanced function to convert text to JSON with better publication extraction"""
+    """Enhanced function to convert text to JSON with correct project structure and publication extraction"""
+
     resume_structure = {
         "personalInfo": {
             "name": "",
@@ -578,6 +717,16 @@ def convert_text_to_json(text):
             }
         ],
         "skills": [],
+        "projects": [
+            {
+                "name": "",
+                "description": "",
+                "technologies": "",
+                "dates": "",
+                "link": "",
+                "role": ""
+            }
+        ],
         "publications": [
             {
                 "title": "",
@@ -588,90 +737,67 @@ def convert_text_to_json(text):
             }
         ]
     }
-    
-    prompt = f"""You are a professional resume writer with expertise in extracting academic publication information. Extract relevant information from the following transcript and format it into a JSON resume.
+
+    prompt = f"""You are a professional resume writer with expertise in extracting academic, technical, and project details. Extract relevant information from the following transcript and format it into a JSON resume.
 
 Here's the transcript: {text}
 
 Please format the response as a valid JSON object with the following structure:
 {json.dumps(resume_structure, indent=2)}
 
-IMPORTANT INSTRUCTIONS FOR PUBLICATIONS:
-1. Pay special attention to any mentions of research papers, publications, academic work, or papers the person has written
-2. When extracting publications, carefully listen for:
-   - Paper titles (often mentioned as "I published a paper called..." or "My paper on..." or "I wrote a paper about...")
-   - Author names (the person speaking is likely one of the authors, but they may mention co-authors)
-   - Publication venues (journal names, conference names like "IEEE", "ACM", "Nature", "CVPR", "ICML", etc.)
-   - Publication years (often mentioned as "in 2023", "last year", "published in 2022", etc.)
-   - Any collaboration mentions ("with my colleague John", "co-authored with", "joint work with")
+INSTRUCTIONS FOR PROJECTS:
+1. Create a **separate section** called "projects" (do NOT merge into experience).
+2. Each project must include:
+   - "name" (title of the project)
+   - "description" (summary of what the project does)
+   - "technologies" (comma-separated string of tech used)
+   - "dates" (e.g. "Jan 2025 - Aug 2025", if mentioned)
+   - "link" (GitHub or demo link, if available)
+   - "role" (e.g., Frontend Developer, Full Stack Developer, etc.)
 
-3. For each publication mentioned:
-   - Extract the exact title as mentioned
-   - Include ALL authors mentioned (if the speaker doesn't mention co-authors, just put their name)
-   - Extract the journal/conference name if mentioned
-   - Extract the publication year if mentioned
-   - Leave the links array empty (will be populated by search function)
+3. Extract phrases like:
+   - "I worked on a project called..."
+   - "My final year project was..."
+   - "I developed/built/designed..."
+   - Look for tech stack mentions
 
-4. Common patterns to listen for:
-   - "I published a paper on [topic] in [journal] in [year]"
-   - "My research on [topic] was published in [venue]"
-   - "I co-authored a paper with [names] about [topic]"
-   - "Our paper titled [title] appeared in [venue]"
-   - "I have [number] publications in [field]"
+INSTRUCTIONS FOR PUBLICATIONS:
+Follow the earlier logic and extract paper title, authors, venue, year, and leave links empty.
 
-5. If the person mentions multiple papers, create separate entries for each one
-6. If specific details are not mentioned, leave those fields empty but still create the publication entry if a paper is mentioned
-
-Fill in all other relevant fields (personal info, experience, education, skills) based on the transcript. If information for a field is not available, leave it empty.
-
-For the experience and education sections, create as many entries as mentioned in the transcript.
-For skills, extract all relevant skills mentioned.
-
-ONLY return the JSON object, nothing else. Do not include any markdown formatting or code blocks."""
+OTHER INSTRUCTIONS:
+- Extract experience, education, skills, personalInfo, summary properly.
+- Return only the JSON object — no markdown, explanations, or code blocks."""
 
     try:
         response_text = call_openrouter_api(prompt, model="openai/gpt-4o-mini")
-        
+
         if not response_text:
             return None
-        
+
         raw_json_str = response_text.strip()
-        
+
         if raw_json_str.startswith("```json"):
             raw_json_str = re.sub(r"^```json\s*", "", raw_json_str)
         if raw_json_str.endswith("```"):
             raw_json_str = raw_json_str[:-3].strip()
-        
+
         parsed_json = json.loads(raw_json_str)
-        
-        if parsed_json.get('publications') and len(parsed_json['publications']) > 0:
-            paper_titles = []
-            for pub in parsed_json['publications']:
-                if pub.get('title') and pub['title'].strip():
-                    paper_titles.append(pub['title'])
-            
+
+        # Enrich publication links if titles are found
+        if parsed_json.get('publications'):
+            paper_titles = [pub['title'] for pub in parsed_json['publications'] if pub.get('title')]
             if paper_titles:
-                print(f"Found {len(paper_titles)} publications from audio, searching for links...")
-                print(f"Publication titles: {paper_titles}")
-                
-                for i, pub in enumerate(parsed_json['publications']):
-                    print(f"Publication {i+1}:")
-                    print(f"  Title: {pub.get('title', 'Not specified')}")
-                    print(f"  Authors: {pub.get('authors', 'Not specified')}")
-                    print(f"  Journal: {pub.get('journal', 'Not specified')}")
-                    print(f"  Year: {pub.get('year', 'Not specified')}")
-                
+                print(f"Found {len(paper_titles)} publications. Searching links...")
                 papers_with_links = search_research_papers(paper_titles)
-                
-                for i, pub in enumerate(parsed_json['publications']):
-                    for paper in papers_with_links:
-                        if paper['title'] == pub['title']:
-                            pub['links'] = paper.get('links', [])
-                            print(f"Added {len(pub['links'])} links to publication: {pub['title']}")
+
+                for pub in parsed_json['publications']:
+                    for match in papers_with_links:
+                        if match['title'] == pub['title']:
+                            pub['links'] = match.get('links', [])
                             break
-        
+
         return parsed_json
-        
+
     except json.JSONDecodeError as e:
         print(f"Error parsing JSON: {e}")
         print(f"Raw response: {response_text}")
@@ -679,6 +805,7 @@ ONLY return the JSON object, nothing else. Do not include any markdown formattin
     except Exception as e:
         print(f"Error in convert_text_to_json: {e}")
         return None
+
 
 def generate_pdf(resume_data, template_id):
     """Generate PDF from resume data based on template"""
