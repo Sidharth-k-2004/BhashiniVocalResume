@@ -1,3 +1,4 @@
+setuptools>=65.5.0
 Flask==3.0.3
 flask-cors==4.0.0
 flask-sqlalchemy==3.1.1
@@ -7,6 +8,9 @@ requests==2.31.0
 SpeechRecognition==3.10.0
 pydub==0.25.1
 reportlab==4.0.4
-openai-whisper==20231117
+openai-whisper
 waitress==2.1.2
+flasgger==0.9.7.1
+flask-mail==0.9.1
+python-dotenv==1.0.0
 PyMySQL==1.1.0

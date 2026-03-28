@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, set_access_cookies, unset_jwt_cookies
+from flasgger import Swagger, swag_from
 import os
 import random
 import uuid
@@ -27,13 +28,54 @@ import logging
 import base64
 import jwt
 from flask_mail import Mail, Message
-
 from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 app.logger.setLevel(logging.DEBUG)
+
+# Swagger Configuration
+swagger_config = {
+    "headers": [],
+    "specs": [
+        {
+            "endpoint": 'apispec',
+            "route": '/apispec.json',
+            "rule_filter": lambda rule: True,
+            "model_filter": lambda tag: True,
+        }
+    ],
+    "static_url_path": "/flasgger_static",
+    "swagger_ui": True,
+    "specs_route": "/api/docs"
+}
+
+swagger_template = {
+    "swagger": "2.0",
+    "info": {
+        "title": "Vocal Resume API",
+        "description": "API for creating resumes from voice input using Bhashini speech recognition",
+        "version": "1.0.0",
+        "contact": {
+            "name": "API Support",
+            "email": "support@vocalresume.com"
+        }
+    },
+    "host": "localhost:5000",
+    "basePath": "/",
+    "schemes": ["http", "https"],
+    "securityDefinitions": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "description": "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'"
+        }
+    }
+}
+
+swagger = Swagger(app, config=swagger_config, template=swagger_template)
 
 app.config['MAIL_SERVER'] = os.environ.get("SMTP_HOST")  
 app.config['MAIL_PORT'] = os.environ.get("SMTP_PORT")  
@@ -1269,6 +1311,52 @@ ONLY return the JSON object, nothing else. Do not include any markdown formattin
 
 @app.route('/api/signup', methods=['POST'])
 def signup():
+    """
+    User Signup
+    ---
+    tags:
+      - Authentication
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          required:
+            - username
+            - email
+            - password
+          properties:
+            username:
+              type: string
+              example: "john_doe"
+            email:
+              type: string
+              format: email
+              example: "john@example.com"
+            password:
+              type: string
+              format: password
+              example: "SecurePass123"
+    responses:
+      201:
+        description: User created successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "User created successfully"
+      400:
+        description: Missing required fields or user already exists
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+      500:
+        description: Server error
+    """
     data = request.json
     username = data.get('username')
     email = data.get('email')
@@ -1289,6 +1377,47 @@ def signup():
 
 @app.route('/api/login', methods=['POST'])
 def login():
+    """
+    User Login
+    ---
+    tags:
+      - Authentication
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          required:
+            - email
+            - password
+          properties:
+            email:
+              type: string
+              format: email
+              example: "john@example.com"
+            password:
+              type: string
+              format: password
+              example: "SecurePass123"
+    responses:
+      200:
+        description: Login successful
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Login successful"
+        headers:
+          Set-Cookie:
+            type: string
+            description: JWT token in cookie
+      400:
+        description: Missing email or password
+      401:
+        description: Invalid credentials
+    """
     data = request.json
     email = data.get('email')
     password = data.get('password')
@@ -1309,6 +1438,21 @@ def login():
 
 @app.route('/api/logout', methods=['POST'])
 def logout():
+    """
+    User Logout
+    ---
+    tags:
+      - Authentication
+    responses:
+      200:
+        description: Logout successful
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Logout successful"
+    """
     response = jsonify({'message': 'Logout successful'})
     unset_jwt_cookies(response)
     return response, 200
@@ -1316,12 +1460,86 @@ def logout():
 @app.route('/api/check-auth', methods=['GET'])
 @jwt_required()
 def check_auth():
+    """
+    Check Authentication Status
+    ---
+    tags:
+      - Authentication
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: User is authenticated
+        schema:
+          type: object
+          properties:
+            authenticated:
+              type: boolean
+              example: true
+            user_id:
+              type: string
+              example: "123"
+      401:
+        description: Unauthorized
+    """
     current_user_id = get_jwt_identity()
     return jsonify({'authenticated': True, 'user_id': current_user_id}), 200
 
 @app.route('/api/process-audio', methods=['POST'])
 @jwt_required()
 def process_audio():
+    """
+    Process Audio to Create Resume
+    ---
+    tags:
+      - Resume Processing
+    security:
+      - Bearer: []
+    consumes:
+      - multipart/form-data
+    parameters:
+      - name: audio
+        in: formData
+        type: file
+        required: true
+        description: Audio file containing resume information
+      - name: templateId
+        in: formData
+        type: string
+        required: false
+        default: "p1"
+        description: Template ID for resume styling
+      - name: language
+        in: formData
+        type: string
+        required: false
+        default: "en"
+        description: Language code (e.g., en, hi, ta)
+    responses:
+      201:
+        description: Resume created successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Resume created successfully"
+            resumeId:
+              type: integer
+              example: 1
+            data:
+              type: object
+              description: Parsed resume data
+            transcript:
+              type: string
+              description: Transcribed text from audio
+      400:
+        description: Bad request (missing audio or invalid template)
+      401:
+        description: Unauthorized
+      500:
+        description: Server error during processing
+    """
     current_user_id = get_jwt_identity()
     
     if 'audio' not in request.files:
@@ -1397,6 +1615,41 @@ def process_audio():
 @app.route('/api/resume/<resume_id>', methods=['GET'])
 @jwt_required()
 def get_resume(resume_id):
+    """
+    Get Resume by ID
+    ---
+    tags:
+      - Resume Management
+    security:
+      - Bearer: []
+    parameters:
+      - name: resume_id
+        in: path
+        type: integer
+        required: true
+        description: Resume ID
+    responses:
+      200:
+        description: Resume data retrieved successfully
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+            template_id:
+              type: string
+            template_name:
+              type: string
+            resume_data:
+              type: object
+            created_at:
+              type: string
+              format: date-time
+      401:
+        description: Unauthorized
+      404:
+        description: Resume not found
+    """
     current_user_id = get_jwt_identity()
     
     resume = Resume.query.filter_by(id=resume_id, user_id=current_user_id).first()
@@ -1416,6 +1669,42 @@ def get_resume(resume_id):
 @app.route('/api/resume/<resume_id>', methods=['PUT'])
 @jwt_required()
 def update_resume(resume_id):
+    """
+    Update Resume
+    ---
+    tags:
+      - Resume Management
+    security:
+      - Bearer: []
+    parameters:
+      - name: resume_id
+        in: path
+        type: integer
+        required: true
+        description: Resume ID
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            resume_data:
+              type: object
+              description: Updated resume data
+    responses:
+      200:
+        description: Resume updated successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Resume updated successfully"
+      401:
+        description: Unauthorized
+      404:
+        description: Resume not found
+    """
     current_user_id = get_jwt_identity()
     
     resume = Resume.query.filter_by(id=resume_id, user_id=current_user_id).first()
@@ -1669,6 +1958,33 @@ IMPORTANT JSON RULES:
 @app.route('/api/resume/<resume_id>', methods=['DELETE'])
 @jwt_required()
 def delete_resume(resume_id):
+    """
+    Delete Resume
+    ---
+    tags:
+      - Resume Management
+    security:
+      - Bearer: []
+    parameters:
+      - name: resume_id
+        in: path
+        type: integer
+        required: true
+        description: Resume ID to delete
+    responses:
+      200:
+        description: Resume deleted successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Resume deleted successfully"
+      401:
+        description: Unauthorized
+      404:
+        description: Resume not found
+    """
     current_user_id = get_jwt_identity()
     
     resume = Resume.query.filter_by(id=resume_id, user_id=current_user_id).first()
@@ -1684,6 +2000,33 @@ def delete_resume(resume_id):
 @app.route('/api/resume/<resume_id>/download', methods=['GET'])
 @jwt_required()
 def download_resume(resume_id):
+    """
+    Download Resume as PDF
+    ---
+    tags:
+      - Resume Management
+    security:
+      - Bearer: []
+    parameters:
+      - name: resume_id
+        in: path
+        type: integer
+        required: true
+        description: Resume ID to download
+    produces:
+      - application/pdf
+    responses:
+      200:
+        description: PDF file
+        schema:
+          type: file
+      401:
+        description: Unauthorized
+      404:
+        description: Resume not found
+      500:
+        description: Error generating PDF
+    """
     current_user_id = get_jwt_identity()
     
     resume = Resume.query.filter_by(id=resume_id, user_id=current_user_id).first()
@@ -1709,6 +2052,33 @@ def download_resume(resume_id):
 @app.route('/api/resumes', methods=['GET'])
 @jwt_required()
 def get_user_resumes():
+    """
+    Get All User Resumes
+    ---
+    tags:
+      - Resume Management
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: List of user resumes
+        schema:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              template_id:
+                type: string
+              template_name:
+                type: string
+              created_at:
+                type: string
+                format: date-time
+      401:
+        description: Unauthorized
+    """
     current_user_id = get_jwt_identity()
     
     resumes = Resume.query.filter_by(user_id=current_user_id).order_by(Resume.updated_at.desc()).all()
@@ -1739,6 +2109,24 @@ def preview_template(template_id):
 
 @app.route('/api/templates', methods=['GET'])
 def get_templates():
+    """
+    Get Available Resume Templates
+    ---
+    tags:
+      - Templates
+    responses:
+      200:
+        description: List of available templates
+        schema:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              name:
+                type: string
+              category:
+                type: string
+    """
     """Get all available templates"""
     template_list = []
     for template_id, template_name in TEMPLATES.items():
@@ -1810,6 +2198,32 @@ def test_serpapi():
 
 @app.route('/api/system-status', methods=['GET'])
 def system_status():
+    """
+    Get System Status
+    ---
+    tags:
+      - System
+    responses:
+      200:
+        description: System configuration status
+        schema:
+          type: object
+          properties:
+            ffmpeg_available:
+              type: boolean
+            bhashini_configured:
+              type: boolean
+            serpapi_configured:
+              type: boolean
+            openrouter_configured:
+              type: boolean
+            database_type:
+              type: string
+            available_templates:
+              type: array
+              items:
+                type: string
+    """
     """Check system status"""
     return jsonify({
         'ffmpeg_available': ffmpeg_available,
@@ -1898,4 +2312,4 @@ if __name__ == '__main__':
     print(f"Available Templates: {list(TEMPLATES.keys())}")
     print("====================")
     
-    serve(app, host='0.0.0.0', port=5000)
+    serve(app, host='0.0.0.0', port=8000)
