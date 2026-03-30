@@ -2,7 +2,7 @@
 
 import { CommandEmpty } from "@/components/ui/command"
 import type React from "react"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -27,10 +27,10 @@ const languages = [
   { code: "te", name: "Telugu" },
 ]
 
-export default function AudioInputPage() {
+function AudioInputContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const templateId = searchParams.get("template") 
+  const templateId = searchParams.get("template")
   const categoryId = searchParams.get("category")
 
   const [isRecording, setIsRecording] = useState(false)
@@ -127,7 +127,7 @@ export default function AudioInputPage() {
       formData.append("language", selectedLanguage) // Append the selected language
 
       // Send to backend
-      const response = await fetch("http://localhost:5000/api/process-audio", {
+      const response = await fetch("http://localhost:8000/api/process-audio", {
         method: "POST",
         body: formData,
         credentials: "include",
@@ -326,5 +326,14 @@ export default function AudioInputPage() {
         </ul>
       </div>
     </div>
+  )
+}
+
+
+export default function AudioInputPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto py-8 px-6 text-center">Loading...</div>}>
+      <AudioInputContent />
+    </Suspense>
   )
 }

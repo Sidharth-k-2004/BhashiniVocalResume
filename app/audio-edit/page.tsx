@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Mic, MicOff, Play, RotateCcw, Check, X, Volume2 } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -52,7 +52,7 @@ interface EditChange {
   description: string
 }
 
-export default function AudioEditPage() {
+function AudioEditContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(true)
@@ -101,7 +101,7 @@ export default function AudioEditPage() {
 
       if (resumeId) {
         // Load from API
-        const response = await fetch(`http://localhost:5000/api/resume/${resumeId}`, {
+        const response = await fetch(`http://localhost:8000/api/resume/${resumeId}`, {
           credentials: "include",
         })
         if (response.ok) {
@@ -205,7 +205,7 @@ export default function AudioEditPage() {
       formData.append("resumeData", JSON.stringify(resumeData))
       formData.append("language", "en")
 
-      const response = await fetch("http://localhost:5000/api/process-audio-edit", {
+      const response = await fetch("http://localhost:8000/api/process-audio-edit", {
         method: "POST",
         body: formData,
         credentials: "include",
@@ -257,7 +257,7 @@ export default function AudioEditPage() {
     try {
       if (resumeId) {
         // Update existing resume
-        const response = await fetch(`http://localhost:5000/api/resume/${resumeId}`, {
+        const response = await fetch(`http://localhost:8000/api/resume/${resumeId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -606,3 +606,12 @@ export default function AudioEditPage() {
   )
 }
 
+
+
+export default function AudioEditPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto py-8 px-6 text-center">Loading...</div>}>
+      <AudioEditContent />
+    </Suspense>
+  )
+}

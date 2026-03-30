@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -247,7 +247,7 @@ const questions: Question[] = [
   },
 ]
 
-export default function GuidedInputPage() {
+function GuidedInputContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const templateId = searchParams.get("template") || "p1"
@@ -280,7 +280,7 @@ export default function GuidedInputPage() {
 
   const checkAuthentication = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/check-auth", {
+      const response = await fetch("http://localhost:8000/api/check-auth", {
         method: "GET",
         credentials: "include",
       })
@@ -389,7 +389,7 @@ export default function GuidedInputPage() {
       formData.append("questionId", currentQuestion.id)
       formData.append("language", "en")
 
-      const response = await fetch("http://localhost:5000/api/process-guided-audio", {
+      const response = await fetch("http://localhost:8000/api/process-guided-audio", {
         method: "POST",
         body: formData,
         credentials: "include",
@@ -472,7 +472,7 @@ export default function GuidedInputPage() {
         [currentQuestion.id]: currentAnswer,
       }
 
-      const response = await fetch("http://localhost:5000/api/generate-guided-resume", {
+      const response = await fetch("http://localhost:8000/api/generate-guided-resume", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -762,5 +762,14 @@ export default function GuidedInputPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+
+export default function GuidedInputPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto py-8 px-6 text-center">Loading...</div>}>
+      <GuidedInputContent />
+    </Suspense>
   )
 }

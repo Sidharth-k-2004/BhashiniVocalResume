@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { toast } from "@/components/ui/use-toast"
 import { Loader2, Plus, X, Save } from "lucide-react"
 
-export default function EditResumePage() {
+function EditResumeContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const resumeId = searchParams.get("id")
@@ -24,7 +24,7 @@ export default function EditResumePage() {
       try {
         if (resumeId) {
           try {
-            const response = await fetch(`http://localhost:5000/api/resume/${resumeId}`, {
+            const response = await fetch(`http://localhost:8000/api/resume/${resumeId}`, {
               credentials: "include",
             })
             if (response.ok) {
@@ -250,7 +250,7 @@ export default function EditResumePage() {
   //     if (resumeId) {
   //       // If we have a resumeId, update via API
   //       try {
-  //         const response = await fetch(`http://localhost:5000/api/resume/${resumeId}`, {
+  //         const response = await fetch(`http://localhost:8000/api/resume/${resumeId}`, {
   //           method: "PUT",
   //           headers: {
   //             "Content-Type": "application/json",
@@ -318,7 +318,7 @@ export default function EditResumePage() {
     if (effectiveResumeId) {
       // If we have a resumeId (either from state or localStorage), update via API
       try {
-        const response = await fetch(`http://localhost:5000/api/resume/${effectiveResumeId}`, {
+        const response = await fetch(`http://localhost:8000/api/resume/${effectiveResumeId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -885,5 +885,14 @@ export default function EditResumePage() {
         </Button>
       </div>
     </div>
+  )
+}
+
+
+export default function EditResumePage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto py-8 px-6 text-center">Loading...</div>}>
+      <EditResumeContent />
+    </Suspense>
   )
 }
