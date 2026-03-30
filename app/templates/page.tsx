@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { ArrowLeft, Lightbulb } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-export default function TemplatesPage() {
+function TemplatesContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const categoryFromUrl = searchParams.get("category") || "1"
@@ -502,4 +502,13 @@ function ExecutiveThumbnail({ variant }: { variant: string }) {
   }
 
   return thumbnails[variant as keyof typeof thumbnails] || thumbnails["1"]
+}
+
+
+export default function TemplatesPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto py-8 px-6 text-center">Loading templates...</div>}>
+      <TemplatesContent />
+    </Suspense>
+  )
 }
