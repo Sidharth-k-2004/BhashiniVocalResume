@@ -22,8 +22,17 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# Environment
-.env*
+# Environment - DO NOT commit actual credentials
+.env
+.env.local
+.env.production
+flask_backend/.env
+flask_backend/.env.local
+
+# Keep example files for reference
+!.env.example
+!flask_backend/.env.example
+!flask_backend/.env.production.example
 
 # Vercel
 .vercel
