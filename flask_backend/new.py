@@ -14,6 +14,15 @@ import speech_recognition as sr
 from pydub import AudioSegment
 from pydub.utils import which
 import io
+
+# Set FFmpeg path for pydub if not in PATH
+if not which("ffmpeg"):
+    # Try common Homebrew installation path on macOS
+    homebrew_ffmpeg = "/opt/homebrew/bin/ffmpeg"
+    if os.path.exists(homebrew_ffmpeg):
+        AudioSegment.converter = homebrew_ffmpeg
+        AudioSegment.ffmpeg = homebrew_ffmpeg
+        AudioSegment.ffprobe = "/opt/homebrew/bin/ffprobe"
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
@@ -32,8 +41,31 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
+
+# Configure CORS - allow localhost:3000 with credentials
+CORS(app,
+     resources={r"/*": {
+         "origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
+         "supports_credentials": True,
+         "allow_headers": ["Content-Type", "Authorization", "Accept"],
+         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+         "expose_headers": ["Content-Type", "Authorization"],
+         "max_age": 3600
+     }})
+
 app.logger.setLevel(logging.DEBUG)
+
+# Add after_request handler for additional CORS headers
+@app.after_request
+def after_request(response):
+    origin = request.headers.get('Origin')
+    if origin in ['http://localhost:3000', 'http://127.0.0.1:3000']:
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, Accept'
+        response.headers['Access-Control-Max-Age'] = '3600'
+    return response
 
 # Swagger Configuration
 swagger_config = {
@@ -590,141 +622,6 @@ def call_openrouter_api(prompt, model="openai/gpt-4o-mini"):
         print(f"Error parsing OpenRouter response: {e}")
         return None
 
-# def convert_text_to_json(text):
-#     """Enhanced function to convert text to JSON with better publication extraction"""
-#     resume_structure = {
-#         "personalInfo": {
-#             "name": "",
-#             "title": "",
-#             "email": "",
-#             "phone": "",
-#             "location": "",
-#             "linkedin": ""
-#         },
-#         "summary": "",
-#         "experience": [
-#             {
-#                 "title": "",
-#                 "company": "",
-#                 "dates": "",
-#                 "location": "",
-#                 "description": ""
-#             }
-#         ],
-#         "education": [
-#             {
-#                 "degree": "",
-#                 "institution": "",
-#                 "dates": "",
-#                 "location": ""
-#             }
-#         ],
-#         "skills": [],
-#         "publications": [
-#             {
-#                 "title": "",
-#                 "authors": "",
-#                 "journal": "",
-#                 "year": "",
-#                 "links": []
-#             }
-#         ]
-#     }
-    
-#     prompt = f"""You are a professional resume writer with expertise in extracting academic publication information. Extract relevant information from the following transcript and format it into a JSON resume.
-
-# Here's the transcript: {text}
-
-# Please format the response as a valid JSON object with the following structure:
-# {json.dumps(resume_structure, indent=2)}
-
-# IMPORTANT INSTRUCTIONS FOR PUBLICATIONS:
-# 1. Pay special attention to any mentions of research papers, publications, academic work, or papers the person has written
-# 2. When extracting publications, carefully listen for:
-#    - Paper titles (often mentioned as "I published a paper called..." or "My paper on..." or "I wrote a paper about...")
-#    - Author names (the person speaking is likely one of the authors, but they may mention co-authors)
-#    - Publication venues (journal names, conference names like "IEEE", "ACM", "Nature", "CVPR", "ICML", etc.)
-#    - Publication years (often mentioned as "in 2023", "last year", "published in 2022", etc.)
-#    - Any collaboration mentions ("with my colleague John", "co-authored with", "joint work with")
-
-# 3. For each publication mentioned:
-#    - Extract the exact title as mentioned
-#    - Include ALL authors mentioned (if the speaker doesn't mention co-authors, just put their name)
-#    - Extract the journal/conference name if mentioned
-#    - Extract the publication year if mentioned
-#    - Leave the links array empty (will be populated by search function)
-
-# 4. Common patterns to listen for:
-#    - "I published a paper on [topic] in [journal] in [year]"
-#    - "My research on [topic] was published in [venue]"
-#    - "I co-authored a paper with [names] about [topic]"
-#    - "Our paper titled [title] appeared in [venue]"
-#    - "I have [number] publications in [field]"
-
-# 5. If the person mentions multiple papers, create separate entries for each one
-# 6. If specific details are not mentioned, leave those fields empty but still create the publication entry if a paper is mentioned
-
-# Fill in all other relevant fields (personal info, experience, education, skills) based on the transcript. If information for a field is not available, leave it empty.
-
-# For the experience and education sections, create as many entries as mentioned in the transcript.
-# For skills, extract all relevant skills mentioned.
-
-# ONLY return the JSON object, nothing else. Do not include any markdown formatting or code blocks."""
-
-#     try:
-#         response_text = call_openrouter_api(prompt, model="openai/gpt-4o-mini")
-        
-#         if not response_text:
-#             return None
-        
-#         raw_json_str = response_text.strip()
-        
-#         if raw_json_str.startswith("```json"):
-#             raw_json_str = re.sub(r"^```json\s*", "", raw_json_str)
-#         if raw_json_str.endswith("```"):
-#             raw_json_str = raw_json_str[:-3].strip()
-        
-#         parsed_json = json.loads(raw_json_str)
-        
-#         if parsed_json.get('publications') and len(parsed_json['publications']) > 0:
-#             paper_titles = []
-#             for pub in parsed_json['publications']:
-#                 if pub.get('title') and pub['title'].strip():
-#                     paper_titles.append(pub['title'])
-            
-#             if paper_titles:
-#                 print(f"Found {len(paper_titles)} publications from audio, searching for links...")
-#                 print(f"Publication titles: {paper_titles}")
-                
-#                 for i, pub in enumerate(parsed_json['publications']):
-#                     print(f"Publication {i+1}:")
-#                     print(f"  Title: {pub.get('title', 'Not specified')}")
-#                     print(f"  Authors: {pub.get('authors', 'Not specified')}")
-#                     print(f"  Journal: {pub.get('journal', 'Not specified')}")
-#                     print(f"  Year: {pub.get('year', 'Not specified')}")
-                
-#                 papers_with_links = search_research_papers(paper_titles)
-                
-#                 for i, pub in enumerate(parsed_json['publications']):
-#                     for paper in papers_with_links:
-#                         if paper['title'] == pub['title']:
-#                             pub['links'] = paper.get('links', [])
-#                             print(f"Added {len(pub['links'])} links to publication: {pub['title']}")
-#                             break
-        
-#         return parsed_json
-        
-#     except json.JSONDecodeError as e:
-#         print(f"Error parsing JSON: {e}")
-#         print(f"Raw response: {response_text}")
-#         return None
-#     except Exception as e:
-#         print(f"Error in convert_text_to_json: {e}")
-#         return None
-
-
-
-
 import json
 import re
 
@@ -1099,7 +996,12 @@ def process_guided_audio():
         }), 200
         
     except Exception as e:
-        app.logger.error(f"Error: {e}")
+        import traceback
+        error_details = traceback.format_exc()
+        app.logger.error(f"Error in process_guided_audio: {e}")
+        app.logger.error(f"Full traceback: {error_details}")
+        print(f"Error in process_guided_audio: {e}")
+        print(f"Full traceback: {error_details}")
         return jsonify({'message': f'Error processing audio: {str(e)}'}), 500
         
     finally:
@@ -1135,6 +1037,7 @@ Return only the cleaned answer, nothing else:"""
         response_text = call_openrouter_api(prompt, model="openai/gpt-4o-mini")
         
         if not response_text:
+            print(f"OpenRouter API returned no response, using original transcript")
             return transcript
         
         cleaned_answer = response_text.strip()
@@ -1145,7 +1048,9 @@ Return only the cleaned answer, nothing else:"""
         return cleaned_answer
         
     except Exception as e:
+        import traceback
         print(f"Error processing guided transcript: {e}")
+        print(f"Traceback: {traceback.format_exc()}")
         return transcript
 
 @app.route('/api/generate-guided-resume', methods=['POST'])
@@ -1309,8 +1214,17 @@ ONLY return the JSON object, nothing else. Do not include any markdown formattin
         print(f"Error in convert_guided_answers_to_resume: {e}")
         return None
 
-@app.route('/api/signup', methods=['POST'])
+@app.route('/api/signup', methods=['POST', 'OPTIONS'])
 def signup():
+    # Handle preflight request
+    print(f"=== SIGNUP ENDPOINT HIT === Method: {request.method}")
+    print(f"Request headers: {dict(request.headers)}")
+    print(f"Request data: {request.get_data()}")
+    
+    if request.method == 'OPTIONS':
+        print("Handling OPTIONS preflight request")
+        return '', 204
+    
     """
     User Signup
     ---

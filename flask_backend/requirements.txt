@@ -14,3 +14,4 @@ flasgger==0.9.7.1
 flask-mail==0.9.1
 python-dotenv==1.0.0
 PyMySQL==1.1.0
+psycopg2-binary==2.9.9
