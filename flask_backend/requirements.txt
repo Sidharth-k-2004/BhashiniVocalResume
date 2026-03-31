@@ -10,3 +10,7 @@ reportlab==4.0.4
 openai-whisper==20231117
 waitress==2.1.2
 PyMySQL==1.1.0
+gunicorn==21.2.0
+psycopg2-binary==2.9.9
+python-dotenv==1.0.0
+flask-mail==0.9.1
