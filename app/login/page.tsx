@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "@/components/ui/use-toast"
+import { fetchApi } from "@/lib/api"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -29,13 +30,9 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch("http://localhost:5000/api/login", {
+      const response = await fetchApi("api/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify(formData),
-        credentials: "include",
       })
 
       const data = await response.json()
