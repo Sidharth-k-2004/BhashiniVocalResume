@@ -4,9 +4,11 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export const getApiUrl = (endpoint: string) => {
-  // Remove leading slash if present to avoid double slashes
+  // Remove leading slash from endpoint to avoid double slashes
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
-  return `${API_URL}/${cleanEndpoint}`;
+  // Remove trailing slash from API_URL to avoid double slashes
+  const cleanApiUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
+  return `${cleanApiUrl}/${cleanEndpoint}`;
 };
 
 // Export the base URL for direct use
