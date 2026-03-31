@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "@/components/ui/use-toast"
+import { fetchApi } from "@/lib/api"
 
 export default function SignupPage() {
   const router = useRouter()
@@ -41,11 +42,8 @@ export default function SignupPage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch("http://localhost:5000/api/signup", {
+      const response = await fetchApi("api/signup", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           username: formData.username,
           email: formData.email,
