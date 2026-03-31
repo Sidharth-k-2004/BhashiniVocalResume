@@ -1897,6 +1897,31 @@ def reset_password():
     db.session.commit()
     return jsonify({'message': 'Password successfully reset'}), 200
 
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint for monitoring"""
+    return jsonify({
+        'status': 'healthy',
+        'service': 'Bhashini Vocal Resume Backend',
+        'timestamp': datetime.datetime.utcnow().isoformat()
+    }), 200
+
+@app.route('/', methods=['GET'])
+def home():
+    """Root endpoint"""
+    return jsonify({
+        'message': 'Bhashini Vocal Resume API',
+        'status': 'running',
+        'version': '1.0.0',
+        'endpoints': {
+            'health': '/health',
+            'signup': '/signup',
+            'login': '/login',
+            'transcribe': '/transcribe',
+            'generate_resume': '/generate-resume'
+        }
+    }), 200
+
 if __name__ == '__main__':
     print("=== System Status ===")
     print(f"FFmpeg available: {ffmpeg_available}")
@@ -1914,3 +1939,4 @@ if __name__ == '__main__':
     print("====================")
     
     serve(app, host='0.0.0.0', port=5000)
+
