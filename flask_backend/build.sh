@@ -2,10 +2,6 @@
 # exit on error
 set -o errexit
 
-# Install system dependencies
-apt-get update
-apt-get install -y ffmpeg
-
 # Upgrade pip
 pip install --upgrade pip
 
