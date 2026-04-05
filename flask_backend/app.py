@@ -34,9 +34,23 @@ load_dotenv()
 app = Flask(__name__)
 
 # Get CORS origins from environment variable or use default
-cors_origins = os.environ.get("CORS_ORIGINS", "https://bhashini-vocal-resume-t6jy.vercel.app").split(",")
-CORS(app, supports_credentials=True, origins=cors_origins)
 
+cors_origins = os.environ.get(
+    "CORS_ORIGINS",
+    "https://bhashini-vocal-resume-t6jy.vercel.app"
+).split(",")
+
+CORS(
+    app,
+    resources={
+        r"/api/*": {
+            "origins": cors_origins
+        }
+    },
+    supports_credentials=True,
+    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+)
 # Set logging level based on environment
 if os.environ.get("FLASK_ENV") == "production":
     app.logger.setLevel(logging.INFO)
@@ -93,6 +107,14 @@ BHASHINI_COMPUTE_URL = "https://dhruva-api.bhashini.gov.in/services/inference"
 print(f"Loaded BHASHINI_USER_ID: {BHASHINI_USER_ID}")
 print(f"Loaded BHASHINI_API_KEY: {BHASHINI_API_KEY[:10]}..." if BHASHINI_API_KEY else "BHASHINI_API_KEY not loaded")
 print(f"Loaded SERPAPI_KEY: {SERPAPI_KEY[:10]}..." if SERPAPI_KEY else "SERPAPI_KEY not loaded")
+
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "https://bhashini-vocal-resume-t6jy.vercel.app"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    return response
+
 
 def check_ffmpeg():
     """Check if FFmpeg is available"""
