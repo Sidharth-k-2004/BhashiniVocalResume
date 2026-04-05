@@ -33,9 +33,20 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Get CORS origins from environment variable or use default
-cors_origins = os.environ.get("CORS_ORIGINS", "https://bhashinivocalresume-backend.onrender.com").split(",")
-CORS(app, supports_credentials=True, origins=cors_origins)
+# Get CORS origins from environment variable or use default.
+# Include the Vercel origin and common localhost origins for local dev/testing.
+default_origins = (
+    "https://bhashinivocalresume-backend.onrender.com,"
+    "https://bhashini-vocal-resume-t6jy.vercel.app,"
+    "http://localhost:3000,"
+    "http://127.0.0.1:3000,"
+    "http://localhost:8000"
+)
+cors_origins = [o.strip() for o in os.environ.get("CORS_ORIGINS", default_origins).split(",") if o.strip()]
+# Apply CORS for the app and API routes; explicitly allow common headers and methods.
+CORS(app, supports_credentials=True, origins=cors_origins, resources={r"/api/*": {"origins": cors_origins}},
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
 # Set logging level based on environment
 if os.environ.get("FLASK_ENV") == "production":

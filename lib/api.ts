@@ -1,7 +1,8 @@
 // API Configuration
 // This file centralizes all API calls to make it easy to switch between environments
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Default to the hosted backend so deployed frontends point to Render backend
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://bhashinivocalresume-backend.onrender.com';
 
 export const getApiUrl = (endpoint: string) => {
   // Remove leading slash from endpoint to avoid double slashes
