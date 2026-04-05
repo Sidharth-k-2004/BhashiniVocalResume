@@ -34,7 +34,7 @@ load_dotenv()
 app = Flask(__name__)
 
 # Get CORS origins from environment variable or use default
-cors_origins = os.environ.get("CORS_ORIGINS", "https://bhashinivocalresume-backend.onrender.com").split(",")
+cors_origins = os.environ.get("CORS_ORIGINS", "https://bhashini-vocal-resume-t6jy.vercel.app").split(",")
 CORS(app, supports_credentials=True, origins=cors_origins)
 
 # Set logging level based on environment
